@@ -48,13 +48,22 @@ public class LoginActivity extends AppCompatActivity {
         // Perform login in a background thread
         new Thread(() -> {
             try {
+                // Fetch the user by username
                 User user = userDao.getUserByUsername(username);
 
-                // Navigate to MainActivity if credentials are valid
                 runOnUiThread(() -> {
                     if (user != null && user.getPassword().equals(password)) {
                         Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(this, MainActivity.class);
+
+                        // Check if the user is an admin
+                        Intent intent;
+                        if (user.isAdmin()) {
+                            // If admin, navigate to Admin Dashboard
+                            intent = new Intent(this, AdminDashboardActivity.class);
+                        } else {
+                            // If regular user, navigate to Home Activity
+                            intent = new Intent(this, HomeActivity.class);
+                        }
                         startActivity(intent);
                         finish(); // Close LoginActivity
                     } else {

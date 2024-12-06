@@ -15,7 +15,14 @@
         <activity
             android:name=".HomeActivity"
             android:exported="false" />
-
+        <activity android:name=".AdminDashboardActivity"
+            android:exported="false" />
+        <activity android:name=".AddProductActivity"
+            android:exported="false" />
+        <activity android:name=".EditProductActivity"
+            android:exported="false" />
+        <activity android:name=".ManageBooksActivity"
+            android:exported="false" />
         <activity
             android:name=".RegActivity"
             android:exported="false" />

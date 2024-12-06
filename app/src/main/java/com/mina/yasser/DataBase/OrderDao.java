@@ -1,5 +1,6 @@
 package com.mina.yasser.DataBase;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -14,7 +15,7 @@ public interface OrderDao {
     @Insert
     void insertOrder(Order order);
 
-    // Update an existing order (for example, to change the status)
+    // Update an existing order (e.g., to change the status or details)
     @Update
     void updateOrder(Order order);
 
@@ -29,4 +30,8 @@ public interface OrderDao {
     // Get all orders
     @Query("SELECT * FROM `orders`")
     List<Order> getAllOrders();
+
+    // Get all orders for a specific user with their book names
+    @Query("SELECT * FROM `orders` WHERE userName = :userName")
+    LiveData<List<Order>> getOrdersByUserName(String userName);
 }

@@ -2,17 +2,40 @@ package com.mina.yasser.DataBase;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.annotation.NonNull;
 
 @Entity(tableName = "product")
 public class Product {
-    @PrimaryKey(autoGenerate = true)
-    private int productId;
+
+    @PrimaryKey
+    @NonNull
+    private String barcode;  // Replace id with barcode
+
     private String name;
+    private String author;
     private String category;
     private double price;
     private int quantityInStock;
 
+    public int getPopularity() {
+        return popularity;
+    }
+
+    public void setPopularity(int popularity) {
+        this.popularity = popularity;
+    }
+
+    private int popularity;
+
     // Getters and Setters
+    public String getBarcode() {
+        return barcode;
+    }
+
+    public void setBarcode(String barcode) {
+        this.barcode = barcode;
+    }
+
     public String getName() {
         return name;
     }
@@ -21,12 +44,12 @@ public class Product {
         this.name = name;
     }
 
-    public int getProductId() {
-        return productId;
+    public String getAuthor() {
+        return author;
     }
 
-    public void setProductId(int productId) {
-        this.productId = productId;
+    public void setAuthor(String author) {
+        this.author = author;
     }
 
     public String getCategory() {

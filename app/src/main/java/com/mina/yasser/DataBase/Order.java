@@ -1,15 +1,21 @@
 package com.mina.yasser.DataBase;
+
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-@Entity(tableName = "orders")
 
+@Entity(tableName = "orders")
 public class Order {
     @PrimaryKey(autoGenerate = true)
     private int orderId;
     private int userId;
+    private String userName;
+    private String bookName;
+    private double price;
+    private String category;
     private String date;
     private String status;
 
+    // Getters and Setters
     public int getOrderId() {
         return orderId;
     }
@@ -24,6 +30,38 @@ public class Order {
 
     public void setUserId(int userId) {
         this.userId = userId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getBookName() {
+        return bookName;
+    }
+
+    public void setBookName(String bookName) {
+        this.bookName = bookName;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public String getDate() {

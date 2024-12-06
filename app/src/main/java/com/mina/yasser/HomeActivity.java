@@ -15,7 +15,7 @@ import com.mina.yasser.DataBase.ProductDao;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.mina.yasser.ProductAdapter;
+import com.mina.yasser.Adapter.ProductAdapter;
 public class HomeActivity extends AppCompatActivity {
 
     private ProductDao productDao;
@@ -36,8 +36,8 @@ public class HomeActivity extends AppCompatActivity {
         AppDatabase database = AppDatabase.getInstance(this);
         productDao = database.productDao();
 
-        // Example: Insert a new product (only for testing; should be done separately in real apps)
-      
+
+
 
         // Observe the product list
         LiveData<List<Product>> allProducts = productDao.getAllProducts();
