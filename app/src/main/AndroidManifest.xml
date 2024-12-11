@@ -45,6 +45,14 @@
         <activity
             android:name=".MainActivity"
             android:exported="true" />
+        <activity android:name=".BarcodeScannerActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:configChanges="orientation|keyboardHidden">
+            <meta-data
+                android:name="com.journeyapps.barcodescanner.CaptureActivity"
+                android:resource="@layout/custom_scanner" />
+        </activity>
+
     </application>
 
 </manifest>
