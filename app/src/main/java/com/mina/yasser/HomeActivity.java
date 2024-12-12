@@ -78,11 +78,17 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void searchProducts(String query) {
-        new Thread(() -> {
-            List<Product> filteredProducts = productDao.searchByTitleOrAuthor("%" + query + "%");
-            runOnUiThread(() -> productAdapter.setProductList(filteredProducts));
-        }).start();
+        // Observe the LiveData returned by the DAO method
+        LiveData<List<Product>> filteredProducts = productDao.searchByTitleOrAuthor("%" + query + "%");
+
+        // Use LiveData's observer to update the product list in the adapter when data changes
+        filteredProducts.observe(this, products -> {
+            if (products != null) {
+                productAdapter.setProductList(products); // Update the adapter with the new product list
+            }
+        });
     }
+
 
     private void startVoiceSearch() {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -120,7 +126,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private void searchByBarcode(String barcode) {
         new Thread(() -> {
-            Product product = productDao.getProductByBarcode(barcode);
+            Product product = productDao.getProductByBarcode(barcode).getValue();
             if (product != null) {
                 List<Product> singleResult = Collections.singletonList(product);
                 runOnUiThread(() -> productAdapter.setProductList(singleResult));

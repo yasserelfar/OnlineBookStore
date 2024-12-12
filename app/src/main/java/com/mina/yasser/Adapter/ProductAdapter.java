@@ -2,6 +2,7 @@ package com.mina.yasser.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,10 +12,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.mina.yasser.AddProductActivity;
+import com.mina.yasser.DataBase.AppDatabase;
+import com.mina.yasser.DataBase.Category;
+import com.mina.yasser.DataBase.CategoryDao;
 import com.mina.yasser.DataBase.Product;
 import com.mina.yasser.DataBase.ProductDao;
 import com.mina.yasser.EditProductActivity;
@@ -29,7 +35,17 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private boolean isAdmin;
     private ProductDao productDao;
     private Context context;
+    private  CategoryDao categoryDao;
+    private LifecycleOwner lifecycleOwner;  // Add LifecycleOwner here
 
+    // Update the constructor to accept lifecycleOwner
+    public ProductAdapter(Context context, List<Product> productList, boolean isAdmin, ProductDao productDao, LifecycleOwner lifecycleOwner) {
+        this.context = context;
+        this.isAdmin = isAdmin;
+        this.productList = productList;
+        this.productDao = productDao;
+        this.lifecycleOwner = lifecycleOwner;
+    }
     public ProductAdapter(Context context, List<Product> productList, boolean isAdmin, ProductDao productDao) {
         this.context = context;
         this.isAdmin = isAdmin;
@@ -44,7 +60,7 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     // ViewHolder for User
     static class ProductUserViewHolder extends RecyclerView.ViewHolder {
-        TextView nameTextView, priceTextView;
+        TextView nameTextView, priceTextView,populartiy,author;
         ImageView productImageView;
         Button btnAddToCart;
 
@@ -52,6 +68,8 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             super(itemView);
             nameTextView = itemView.findViewById(R.id.productName);
             priceTextView = itemView.findViewById(R.id.productPrice);
+            author=itemView.findViewById(R.id.productAuthor);
+            populartiy=itemView.findViewById(R.id.productPopularity);
             productImageView = itemView.findViewById(R.id.productImage);  // ImageView for product image
             btnAddToCart = itemView.findViewById(R.id.btnAddToCart);  // Button for Add to Cart
         }
@@ -59,7 +77,7 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     // ViewHolder for Admin
     static class ProductAdminViewHolder extends RecyclerView.ViewHolder {
-        TextView nameTextView, priceTextView, barcodeTextView;
+        TextView nameTextView, priceTextView, barcodeTextView,category;
         ImageView productImageView;
         Button btnEdit, btnDelete;
 
@@ -68,7 +86,7 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             nameTextView = itemView.findViewById(R.id.productName);
             priceTextView = itemView.findViewById(R.id.productPrice);
             barcodeTextView = itemView.findViewById(R.id.productBarcode);
-            productImageView = itemView.findViewById(R.id.productImage);  // ImageView for product image
+            category=itemView.findViewById(R.id.productcategory);
             btnEdit = itemView.findViewById(R.id.btnEdit);
             btnDelete = itemView.findViewById(R.id.btnDelete);
         }
@@ -94,28 +112,34 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     @Override
+
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         Product product = productList.get(position);
 
-        if (holder instanceof ProductUserViewHolder) {
-            // Set product name and price for the user view
-            ((ProductUserViewHolder) holder).nameTextView.setText(product.getName());
-            ((ProductUserViewHolder) holder).priceTextView.setText("Price: $" + product.getPrice());
-
-            // Load product image using Glide
-
-            // Handle Add to Cart button click
-            ((ProductUserViewHolder) holder).btnAddToCart.setOnClickListener(v -> {
-                // Implement the logic to add the product to cart here
-                Toast.makeText(context, "Added to Cart: " + product.getName(), Toast.LENGTH_SHORT).show();
-            });
-
-        } else if (holder instanceof ProductAdminViewHolder) {
+        if (holder instanceof ProductAdminViewHolder) {
             // Set product name, price, and barcode for admin view
             ((ProductAdminViewHolder) holder).nameTextView.setText(product.getName());
             ((ProductAdminViewHolder) holder).priceTextView.setText("Price: $" + product.getPrice());
             ((ProductAdminViewHolder) holder).barcodeTextView.setText("Barcode: " + product.getBarcode());
+            ((ProductAdminViewHolder) holder).category.setText("Category: Loading..."); // Temporary loading text
 
+            categoryDao = AppDatabase.getInstance(context).categoryDao(); // Ensure this is not null
+
+            if (categoryDao != null && lifecycleOwner != null) {
+                categoryDao.getCategoryById(product.getCategoryId()).observe(lifecycleOwner, new Observer<Category>() {
+                    @Override
+                    public void onChanged(Category category) {
+                        if (category != null) {
+                            ((ProductAdminViewHolder) holder).category.setText("Category: " + category.getName());
+                        } else {
+                            ((ProductAdminViewHolder) holder).category.setText("Category: Not Found");
+                        }
+                    }
+                });
+            } else {
+                Log.e("ProductAdapter", "CategoryDao or lifecycleOwner is null, unable to fetch category.");
+                ((ProductAdminViewHolder) holder).category.setText("Category: Error");
+            }
 
             // Handle Edit and Delete buttons for admin
             ((ProductAdminViewHolder) holder).btnEdit.setOnClickListener(v -> {
@@ -128,7 +152,21 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 deleteProduct(product);
             });
         }
+        else{
+            // Set product name and price for the user view
+            ((ProductUserViewHolder) holder).nameTextView.setText(product.getName());
+            ((ProductUserViewHolder) holder).author.setText(product.getAuthor());
+            ((ProductUserViewHolder) holder).populartiy.setText("popularity:"+product.getPopularity());
+            ((ProductUserViewHolder) holder).priceTextView.setText("Price: $" + product.getPrice());
+
+            // Handle Add to Cart button click
+            ((ProductUserViewHolder) holder).btnAddToCart.setOnClickListener(v -> {
+                // Implement the logic to add the product to cart here
+                Toast.makeText(context, "Added to Cart: " + product.getName(), Toast.LENGTH_SHORT).show();
+            });
+        }
     }
+
 
     @Override
     public int getItemCount() {

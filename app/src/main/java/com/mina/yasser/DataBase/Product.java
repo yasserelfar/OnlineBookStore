@@ -1,30 +1,22 @@
 package com.mina.yasser.DataBase;
 
 import androidx.room.Entity;
+import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 import androidx.annotation.NonNull;
 
-@Entity(tableName = "product")
+@Entity(tableName = "product", foreignKeys = @ForeignKey(entity = Category.class, parentColumns = "id", childColumns = "categoryId", onDelete = ForeignKey.CASCADE))
 public class Product {
 
     @PrimaryKey
     @NonNull
-    private String barcode;  // Replace id with barcode
+    private String barcode;
 
     private String name;
     private String author;
-    private String category;
+    private int categoryId;  // Store the Category ID (Foreign Key)
     private double price;
     private int quantityInStock;
-
-    public int getPopularity() {
-        return popularity;
-    }
-
-    public void setPopularity(int popularity) {
-        this.popularity = popularity;
-    }
-
     private int popularity;
 
     // Getters and Setters
@@ -52,12 +44,12 @@ public class Product {
         this.author = author;
     }
 
-    public String getCategory() {
-        return category;
+    public int getCategoryId() {
+        return categoryId;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
     }
 
     public double getPrice() {
@@ -74,5 +66,27 @@ public class Product {
 
     public void setQuantityInStock(int quantityInStock) {
         this.quantityInStock = quantityInStock;
+    }
+
+    public int getPopularity() {
+        return popularity;
+    }
+
+    public void setPopularity(int popularity) {
+        this.popularity = popularity;
+    }
+
+    // Optional: Override toString for debugging/logging purposes
+    @Override
+    public String toString() {
+        return "Product{" +
+                "barcode='" + barcode + '\'' +
+                ", name='" + name + '\'' +
+                ", author='" + author + '\'' +
+                ", categoryId=" + categoryId +
+                ", price=" + price +
+                ", quantityInStock=" + quantityInStock +
+                ", popularity=" + popularity +
+                '}';
     }
 }

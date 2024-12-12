@@ -24,7 +24,7 @@ public class ProductViewModel extends AndroidViewModel {
     }
 
     // Get products by category as LiveData
-    public LiveData<List<Product>> getProductsByCategory(String category) {
+    public LiveData<List<Product>> getProductsByCategory(int category) {
         return repository.getProductsByCategory(category);  // repository returns LiveData<List<Product>>
     }
 }

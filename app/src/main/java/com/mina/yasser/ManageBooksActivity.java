@@ -15,7 +15,6 @@ import com.mina.yasser.DataBase.ProductDao;
 
 import java.util.ArrayList;
 import java.util.List;
-
 public class ManageBooksActivity extends AppCompatActivity {
 
     private RecyclerView recyclerViewBooks;
@@ -43,7 +42,7 @@ public class ManageBooksActivity extends AppCompatActivity {
         recyclerViewBooks.setLayoutManager(new LinearLayoutManager(this));
 
         // Initialize the adapter (pass empty list initially, will be updated later)
-        productAdapter = new ProductAdapter(this, new ArrayList<>(), isAdmin, productDao);
+        productAdapter = new ProductAdapter(this, new ArrayList<>(), isAdmin, productDao, this);  // Pass 'this' as the LifecycleOwner
         recyclerViewBooks.setAdapter(productAdapter);
 
         // Observe changes in the product list and update the adapter

@@ -11,7 +11,7 @@
         android:layout_height="100dp"
         android:layout_gravity="center"
         android:scaleType="centerCrop"
-        android:src="@drawable/cat1"
+        android:src="@drawable/cat6"
     android:layout_marginBottom="8dp" />
 
     <!-- Product Name -->

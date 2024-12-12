@@ -37,15 +37,13 @@ public interface ProductDao {
     LiveData<List<Product>> getTopPopularProducts(int limit);
 
     // Get products by category as LiveData
-    @Query("SELECT * FROM product WHERE category = :category")
-    LiveData<List<Product>> getProductsByCategory(String category);
+    @Query("SELECT * FROM product WHERE categoryId = :category")
+    LiveData<List<Product>> getProductsByCategory(int category);
 
-    // Get a product by barcode
+    // Get a product by barcode (now LiveData for consistency)
     @Query("SELECT * FROM product WHERE barcode = :barcode LIMIT 1")
-    Product getProductByBarcode(String barcode);
+    LiveData<Product> getProductByBarcode(String barcode);
+    // Search by title or author, returns LiveData
     @Query("SELECT * FROM product WHERE name LIKE :query OR author LIKE :query")
-    List<Product> searchByTitleOrAuthor(String query);
-
-
-
+    LiveData<List<Product>> searchByTitleOrAuthor(String query);
 }
