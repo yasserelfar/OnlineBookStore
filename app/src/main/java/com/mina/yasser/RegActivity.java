@@ -102,7 +102,7 @@ public class RegActivity extends AppCompatActivity {
                 newUser.setAddress(address);
                 newUser.setPhone(phone);
                 newUser.setBirthdate(birthdate);
-                newUser.setAdmin(false); // Default: Not an admin
+                newUser.setAdmin(true); // Default: Not an admin
 
                 // Insert into the database
                 userDao.insertUser(newUser);

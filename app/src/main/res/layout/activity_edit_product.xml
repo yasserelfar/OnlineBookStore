@@ -63,7 +63,23 @@
         android:hint="Enter product quantity"
         android:inputType="number"
         android:layout_marginBottom="16dp"/>
+    <!-- edition Input -->
+    <TextView
+        android:id="@+id/txtProductEdition"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Edition"
+        android:textSize="16sp"
+        android:layout_marginBottom="8dp"/>
 
+    <EditText
+        android:id="@+id/edtProductEdition"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Edition"
+        android:inputType="number"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp"/>
 
     <!-- Save Button -->
     <Button
