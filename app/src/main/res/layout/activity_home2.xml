@@ -45,7 +45,7 @@
             android:id="@+id/btnAccount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/user_1"
+            android:src="@drawable/user"
             android:contentDescription="Account"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="8dp"
