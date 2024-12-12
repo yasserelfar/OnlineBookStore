@@ -1,9 +1,12 @@
 package com.mina.yasser;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,7 +19,9 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText etUsername;
     private EditText etPassword;
+    private CheckBox rememberMeCheckBox;
     private UserDao userDao;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,10 +31,29 @@ public class LoginActivity extends AppCompatActivity {
         // Initialize views
         etUsername = findViewById(R.id.LoginUsername);
         etPassword = findViewById(R.id.password);
+        rememberMeCheckBox = findViewById(R.id.rememberMeCheckBox);
+        TextView forgotPassword = findViewById(R.id.forgotPassword); // TextView for "Forgot Password"
 
         // Initialize Room database using Singleton
         AppDatabase database = AppDatabase.getInstance(getApplicationContext());
         userDao = database.userDao();
+
+        // Initialize SharedPreferences
+        sharedPreferences = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+
+        // Check if "Remember Me" is checked and pre-fill credentials
+        boolean isRemembered = sharedPreferences.getBoolean("RememberMe", false);
+        if (isRemembered) {
+            etUsername.setText(sharedPreferences.getString("Username", ""));
+            etPassword.setText(sharedPreferences.getString("Password", ""));
+            rememberMeCheckBox.setChecked(true);
+        }
+
+        // Handle "Forgot Password" click
+        forgotPassword.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
+            startActivity(intent);
+        });
     }
 
     public void login(View view) {
@@ -48,20 +72,29 @@ public class LoginActivity extends AppCompatActivity {
         // Perform login in a background thread
         new Thread(() -> {
             try {
-                // Fetch the user by username
                 User user = userDao.getUserByUsername(username);
 
                 runOnUiThread(() -> {
                     if (user != null && user.getPassword().equals(password)) {
                         Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
 
-                        // Check if the user is an admin
+                        // Save to SharedPreferences if "Remember Me" is checked
+                        if (rememberMeCheckBox.isChecked()) {
+                            sharedPreferences.edit()
+                                    .putBoolean("RememberMe", true)
+                                    .putString("Username", username)
+                                    .putString("Password", password)
+                                    .apply();
+                        } else {
+                            sharedPreferences.edit()
+                                    .clear()
+                                    .apply();
+                        }
+
                         Intent intent;
                         if (user.isAdmin()) {
-                            // If admin, navigate to Admin Dashboard
                             intent = new Intent(this, AdminDashboardActivity.class);
                         } else {
-                            // If regular user, navigate to Home Activity
                             intent = new Intent(this, HomeActivity.class);
                         }
                         startActivity(intent);
