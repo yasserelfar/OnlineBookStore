@@ -17,7 +17,6 @@ public class AdminDashboardActivity extends AppCompatActivity {
         Button manageBooksButton = findViewById(R.id.manageBooksButton);
         Button manageCategoriesButton = findViewById(R.id.manageCategoriesButton);
         Button processOrdersButton = findViewById(R.id.processOrdersButton);
-        Button viewPerformanceButton = findViewById(R.id.viewPerformanceButton);
 
 //         Set up click listeners for buttons
         manageBooksButton.setOnClickListener(v ->
@@ -25,9 +24,9 @@ public class AdminDashboardActivity extends AppCompatActivity {
         );
 
 //         Uncomment and implement the following buttons once their activities are ready
-//         manageCategoriesButton.setOnClickListener(v ->
-//             startActivity(new Intent(AdminDashboardActivity.this, ManageCategoriesActivity.class))
-//         );
+         manageCategoriesButton.setOnClickListener(v ->
+             startActivity(new Intent(AdminDashboardActivity.this, ManageCategoriesActivity.class))
+         );
 //
 //         processOrdersButton.setOnClickListener(v ->
 //             startActivity(new Intent(AdminDashboardActivity.this, ProcessOrdersActivity.class))
