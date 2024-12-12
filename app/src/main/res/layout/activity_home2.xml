@@ -2,20 +2,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
+
+    <!-- Header with Search and Account Icon -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="8dp">
 
+        <!-- Search Box -->
         <EditText
             android:id="@+id/edtSearch"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="Search by name or author"
-            android:inputType="text" />
+            android:inputType="text"
+            android:minHeight="48dp" />
 
+        <!-- Voice Search Button -->
         <ImageButton
             android:id="@+id/btnVoiceSearch"
             android:layout_width="wrap_content"
@@ -25,6 +30,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="8dp" />
 
+        <!-- Barcode Search Button -->
         <ImageButton
             android:id="@+id/btnBarcodeSearch"
             android:layout_width="wrap_content"
@@ -33,16 +39,32 @@
             android:contentDescription="Barcode Search"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="8dp" />
+
+        <!-- Account Icon Button (Added) -->
+        <ImageButton
+            android:id="@+id/btnAccount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/user_1"
+            android:contentDescription="Account"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:layout_gravity="end" /> <!-- Align to the right side -->
+
     </LinearLayout>
 
+    <!-- Title Text -->
     <TextView
         android:id="@+id/titleText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Products" />
+        android:text="Products"
+        android:textSize="18sp"
+        android:layout_marginStart="16dp" />
 
+    <!-- Product List -->
     <androidx.recyclerview.widget.RecyclerView
-    android:id="@+id/productList"
+        android:id="@+id/productList"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </LinearLayout>

@@ -43,7 +43,7 @@ public class HomeActivity extends AppCompatActivity {
         EditText edtSearch = findViewById(R.id.edtSearch);
         ImageButton btnVoiceSearch = findViewById(R.id.btnVoiceSearch);
         ImageButton btnBarcodeSearch = findViewById(R.id.btnBarcodeSearch);
-
+        ImageButton btnAccount = findViewById(R.id.btnAccount);
         RecyclerView productList = findViewById(R.id.productList);
         productList.setLayoutManager(new LinearLayoutManager(this));
         productAdapter = new ProductAdapter(this, new ArrayList<>(), false, productDao);
@@ -51,7 +51,10 @@ public class HomeActivity extends AppCompatActivity {
 
         AppDatabase database = AppDatabase.getInstance(this);
         productDao = database.productDao();
-
+        btnAccount.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, AccountManagementActivity.class);
+            startActivity(intent);
+        });
         // Observe products initially
         LiveData<List<Product>> allProducts = productDao.getAllProducts();
         allProducts.observe(this, products -> productAdapter.setProductList(products));

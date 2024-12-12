@@ -84,6 +84,7 @@ public class LoginActivity extends AppCompatActivity {
                                     .putBoolean("RememberMe", true)
                                     .putString("Username", username)
                                     .putString("Password", password)
+                                    .putInt("userId", user.getUserId())
                                     .apply();
                         } else {
                             sharedPreferences.edit()
