@@ -8,6 +8,16 @@ public class Order {
     @PrimaryKey(autoGenerate = true)
     private int orderId;
     private int userId;
+    private int cartId;
+
+    public int getCartId() {
+        return cartId;
+    }
+
+    public void setCartId(int cartId) {
+        this.cartId = cartId;
+    }
+
     private String userName;
     private String bookName;
     private double price;

@@ -31,6 +31,8 @@ public interface ProductDao {
     // Get products by author as LiveData
     @Query("SELECT * FROM product WHERE author = :author")
     LiveData<List<Product>> getProductsByAuthor(String author);
+    @Query("SELECT * FROM Product WHERE barcode IN (:barcodes)")
+    List<Product> getProductsByBarcodes(List<String> barcodes);
 
     // Get products sorted by popularity in descending order
     @Query("SELECT * FROM product ORDER BY popularity DESC LIMIT :limit")

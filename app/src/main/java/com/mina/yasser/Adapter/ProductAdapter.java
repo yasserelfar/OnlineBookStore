@@ -249,41 +249,37 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
 
     private void addToCart(Product product, int userId) {
-
-//            int userId = sharedPreferences.getInt("userId", -1);
         // Use ExecutorService to perform database operations off the main thread
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.execute(() -> {
-            // Perform the database operations in the background thread
-            Cart existingCartItem = cartDao.getCartItemByProduct(userId, product.getBarcode()).getValue();
-
-            if (existingCartItem != null) {
-                // If the product is already in the cart, update the quantity
-                existingCartItem.setQuantity(existingCartItem.getQuantity() + 1);
-                cartDao.updateCart(existingCartItem);
-            } else {
-                // If the product is not in the cart, add a new item
-                Cart newCartItem = new Cart();
-                newCartItem.setUserId(userId);
-                newCartItem.setProductBarcode(product.getBarcode());
-                newCartItem.setQuantity(1);
-//                cartDao.insertProduct(newCartItem);
-                Executors.newSingleThreadExecutor().execute(() -> {
+            try {
+                // Fetch the existing cart item
+                Cart existingCartItem = cartDao.getCartItemByProductSync(userId, product.getBarcode());
+                if (existingCartItem != null) {
+                    // If the product is already in the cart, update the quantity
+                    existingCartItem.setQuantity(existingCartItem.getQuantity() + 1);
+                    cartDao.updateCart(existingCartItem);
+                    Log.d("AddToCart", "Updated quantity for product: " + product.getName());
+                } else {
+                    // If the product is not in the cart, add a new item
+                    Cart newCartItem = new Cart();
+                    newCartItem.setUserId(userId);
+                    newCartItem.setProductBarcode(product.getBarcode());
+                    newCartItem.setQuantity(1);
                     cartDao.insertProduct(newCartItem);
-                    Log.d("AddToCart", "Inserted cart: userId=" + userId + ", barcode=" + product.getBarcode());
-                    Log.d("AddToCart", "User ID: " + userId + ", Cart Item: " + newCartItem.getCartId());
-                });
-            }
+                    Log.d("AddToCart", "Inserted new product: " + product.getName());
+                }
 
-            // Post the Toast message on the main thread
-            new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                Log.d("AddToCart", "User ID: " + userId);
-                Log.d("CartActivity", "User ID: " + userId);
-                Log.d("AddToCart", "Cart item added: userId=" + userId + ", barcode=" + product.getBarcode());
-                Toast.makeText(context, "Added to Cart: " + product.getName(), Toast.LENGTH_SHORT).show();
-            });
+                // Post a toast message to the main thread
+                new android.os.Handler(android.os.Looper.getMainLooper()).post(() ->
+                        Toast.makeText(context, "Added to Cart: " + product.getName(), Toast.LENGTH_SHORT).show()
+                );
+            } catch (Exception e) {
+                Log.e("AddToCart", "Error adding product to cart: " + e.getMessage());
+            }
         });
     }
+
 
 
 

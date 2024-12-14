@@ -147,6 +147,11 @@ public class CheckoutActivity extends AppCompatActivity {
         order.setPrice(totalPrice);
         order.setDate(currentDate);
         order.setStatus("Pending");
+        Log.e("cart", "Product not found for barcode: " + cartList.get(0).getCartId());
+        Log.e("cart", "Product not found for barcode: " + cartList.get(0).getProductBarcode());
+
+
+        order.setCartId(cartList.get(0).getCartId());
 
         orderDao.insertOrder(order);
     }

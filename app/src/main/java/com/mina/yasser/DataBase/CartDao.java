@@ -22,13 +22,18 @@ public interface CartDao {
     void updateQuantity(int userId, String productBarcode, int quantity);
 
     // Get all products in the cart for a user (LiveData for observing changes)
-    @Query("SELECT * FROM cart WHERE userId = :userId")
+    @Query("SELECT * FROM Cart WHERE userId = :userId")
     LiveData<List<Cart>> getCartProducts(int userId);
-
+    @Query("SELECT * FROM Cart WHERE userId = :userId")
+    List<Cart> getCartItemsByUserId(int userId);
     // Delete a specific cart entry
     @Delete
     void deleteCart(Cart cart);
+    @Query("SELECT * FROM Cart WHERE userId = :userId AND productBarcode = :barcode LIMIT 1")
+    Cart getCartItemByProductSync(int userId, String barcode);
 
+    @Query("SELECT * FROM Cart WHERE userId = :userId AND productBarcode = :barcode LIMIT 1")
+    Cart getCartItemByUserIdAndBarcode(String userId, String barcode);
     // Update an existing cart entry
     @Update
     void updateCart(Cart cart);

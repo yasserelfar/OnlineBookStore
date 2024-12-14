@@ -68,7 +68,7 @@ public class CartActivity extends AppCompatActivity {
         // Assuming you have a cart ID or an identifier for the entire cart (e.g., cartId)
         // Here we use the first cart item's ID, you can adjust based on your requirement.
         if (!cartList.isEmpty()) {
-            long cartId = cartList.get(0).getCartId(); // Adjust this as per your Cart model
+            long cartId =cartList.get(0).getCartId(); // Adjust this as per your Cart model
 
             // Navigate to CheckoutActivity with total price, userId, and cartId
             Intent intent = new Intent(CartActivity.this, CheckoutActivity.class);
