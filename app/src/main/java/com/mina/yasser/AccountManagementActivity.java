@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,9 +19,10 @@ public class AccountManagementActivity extends AppCompatActivity {
 
     private EditText etUsername, etEmail, etAddress, etPhone;
     private TextView tvBirthdate;
-    private Button btnUpdate, btnLogout;
+    private Button btnUpdate, btnLogout,btnorders;
     private UserDao userDao;
     private User currentUser;
+    ImageButton btnCart;
     private SharedPreferences sharedPreferences;
 
     @Override
@@ -49,10 +51,20 @@ public class AccountManagementActivity extends AppCompatActivity {
         tvBirthdate = findViewById(R.id.tvBirthdate);
         btnUpdate = findViewById(R.id.btnUpdate);
         btnLogout = findViewById(R.id.btnLogout);
-
+        btnCart  = findViewById(R.id.btnCart);
+        btnorders= findViewById(R.id.btnorders);
         // Initialize DAO
         AppDatabase database = AppDatabase.getInstance(this);
         userDao = database.userDao();
+        btnorders.setOnClickListener(v -> {
+            Intent intent = new Intent(this, OrderActivity.class);
+            startActivity(intent);
+        });
+        btnCart.setOnClickListener(v -> {
+            Intent intent = new Intent(this, CartActivity.class);
+            startActivity(intent);
+        }
+        );
 
         // Load user details
         new Thread(() -> {
@@ -67,7 +79,7 @@ public class AccountManagementActivity extends AppCompatActivity {
                 }
             });
         }).start();
-
+        etUsername.setEnabled(false);
         // Handle update button click
         btnUpdate.setOnClickListener(v -> updateAccountDetails());
 
