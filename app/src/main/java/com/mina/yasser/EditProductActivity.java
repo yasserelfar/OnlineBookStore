@@ -2,7 +2,6 @@ package com.mina.yasser;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.Button;
 import android.widget.Spinner;
@@ -19,7 +18,7 @@ import com.mina.yasser.DataBase.Product;
 import com.mina.yasser.DataBase.ProductDao;
 import com.mina.yasser.DataBase.CategoryDao;
 import com.mina.yasser.ViewModel.CategoryViewModel;
-import com.mina.yasser.factory.CategoryFactory;
+import com.mina.yasser.flyweight.CategoryFactory;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -77,7 +76,7 @@ public class EditProductActivity extends AppCompatActivity {
             @Override
             public void onChanged(List<Category> categories) {
                 if (categories != null && !categories.isEmpty()) {
-                    // Convert the category objects to category names using the factory method
+                    // Convert the category objects to category names using the flyweight method
                     List<String> categoryNames = CategoryFactory.convertToCategoryNames(categories);
                     categoryAdapter = new ArrayAdapter<>(EditProductActivity.this, android.R.layout.simple_spinner_item, categoryNames);
                     categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

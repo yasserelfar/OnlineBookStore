@@ -1,12 +1,17 @@
 package com.mina.yasser.Adapter;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -20,6 +25,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.mina.yasser.AddProductActivity;
 import com.mina.yasser.DataBase.AppDatabase;
+import com.mina.yasser.DataBase.Cart;
+import com.mina.yasser.DataBase.CartDao;
 import com.mina.yasser.DataBase.Category;
 import com.mina.yasser.DataBase.CategoryDao;
 import com.mina.yasser.DataBase.Product;
@@ -29,6 +36,9 @@ import com.mina.yasser.ManageBooksActivity;
 import com.mina.yasser.R;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Handler;
 
 public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -38,6 +48,11 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private Context context;
     private  CategoryDao categoryDao;
     private LifecycleOwner lifecycleOwner;  // Add LifecycleOwner here
+    private CartDao cartDao;
+    private Object holder;
+    private SharedPreferences sharedPreferences;
+
+    private int userId;
 
     // Update the constructor to accept lifecycleOwner
     public ProductAdapter(Context context, List<Product> productList, boolean isAdmin, ProductDao productDao, LifecycleOwner lifecycleOwner) {
@@ -46,12 +61,27 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         this.productList = productList;
         this.productDao = productDao;
         this.lifecycleOwner = lifecycleOwner;
+        cartDao = AppDatabase.getInstance(context).cartDao();
+
     }
+    public ProductAdapter(Context context, List<Product> productList, boolean isAdmin, ProductDao productDao, CartDao cartDao, LifecycleOwner lifecycleOwner) {
+        this.context = context;
+        this.isAdmin = isAdmin;
+        this.productList = productList;
+        this.productDao = productDao;
+        this.cartDao = cartDao; // Ensure CartDao is initialized here
+        this.lifecycleOwner = lifecycleOwner;
+        cartDao = AppDatabase.getInstance(context).cartDao();
+
+    }
+
     public ProductAdapter(Context context, List<Product> productList, boolean isAdmin, ProductDao productDao) {
         this.context = context;
         this.isAdmin = isAdmin;
         this.productList = productList;
         this.productDao = productDao;
+        cartDao = AppDatabase.getInstance(context).cartDao();
+
     }
     public void setProductList(List<Product> products) {
         this.productList = products;  // Correctly update the list
@@ -66,6 +96,7 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         Button btnAddToCart;
 
         public ProductUserViewHolder(View itemView) {
+
             super(itemView);
             nameTextView = itemView.findViewById(R.id.productName);
             priceTextView = itemView.findViewById(R.id.productPrice);
@@ -134,8 +165,7 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             ((ProductAdminViewHolder) holder).populartiy.setText("popularity:"+product.getPopularity());
 
             categoryDao = AppDatabase.getInstance(context).categoryDao(); // Ensure this is not null
-
-            if (categoryDao != null && lifecycleOwner != null) {
+                        if (categoryDao != null && lifecycleOwner != null) {
                 categoryDao.getCategoryById(product.getCategoryId()).observe(lifecycleOwner, new Observer<Category>() {
                     @Override
                     public void onChanged(Category category) {
@@ -163,6 +193,8 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             });
         }
         else{
+           // Default -1 if not found
+
             // Set product name and price for the user view
             ((ProductUserViewHolder) holder).nameTextView.setText(product.getName());
             ((ProductUserViewHolder) holder).author.setText(product.getAuthor());
@@ -171,12 +203,88 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             ((ProductUserViewHolder) holder).edition.setText("productEdition :"+product.getEdition());
             ((ProductUserViewHolder) holder).priceTextView.setText("Price: $" + product.getPrice());
             // Handle Add to Cart button click
+
+            SharedPreferences sharedPreferences = context.getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
+            // Get stored userId
+            userId = sharedPreferences.getInt("userId", -1);
             ((ProductUserViewHolder) holder).btnAddToCart.setOnClickListener(v -> {
-                // Implement the logic to add the product to cart here
+                addToCart(product,userId);
                 Toast.makeText(context, "Added to Cart: " + product.getName(), Toast.LENGTH_SHORT).show();
             });
         }
     }
+//    public void addToCart(String productBarcode, int quantity) {
+//        ExecutorService executor = Executors.newSingleThreadExecutor();
+//        executor.execute(() -> {
+//            if (cartDao == null) {
+//                Log.e("ProductAdapter", "CartDao is null!");
+//                return;
+//            }
+//
+//
+//
+//            if (userId == -1) {
+//                // Handle error: User not logged in
+//                return;
+//            }
+//
+//            Cart existingCart = cartDao.getCartProduct(userId, productBarcode);
+//            if (existingCart != null) {
+//                // Update existing cart item
+//                cartDao.updateQuantity(userId, productBarcode, existingCart.getQuantity() + quantity);
+//                Log.d("Cart", "Updated product in cart");
+//            } else {
+//                // Insert new product into cart
+//                Cart newCart = new Cart();
+//                newCart.setUserId(userId);
+//                newCart.setProductBarcode(productBarcode);
+//                newCart.setQuantity(quantity);
+//                cartDao.insertProduct(newCart);
+//                Log.d("Cart", "Inserted new product into cart");
+//            }
+//
+//
+//        });
+//    }
+
+
+    private void addToCart(Product product, int userId) {
+
+//            int userId = sharedPreferences.getInt("userId", -1);
+        // Use ExecutorService to perform database operations off the main thread
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(() -> {
+            // Perform the database operations in the background thread
+            Cart existingCartItem = cartDao.getCartItemByProduct(userId, product.getBarcode()).getValue();
+
+            if (existingCartItem != null) {
+                // If the product is already in the cart, update the quantity
+                existingCartItem.setQuantity(existingCartItem.getQuantity() + 1);
+                cartDao.updateCart(existingCartItem);
+            } else {
+                // If the product is not in the cart, add a new item
+                Cart newCartItem = new Cart();
+                newCartItem.setUserId(userId);
+                newCartItem.setProductBarcode(product.getBarcode());
+                newCartItem.setQuantity(1);
+//                cartDao.insertProduct(newCartItem);
+                Executors.newSingleThreadExecutor().execute(() -> {
+                    cartDao.insertProduct(newCartItem);
+                    Log.d("AddToCart", "Inserted cart: userId=" + userId + ", barcode=" + product.getBarcode());
+                    Log.d("AddToCart", "User ID: " + userId + ", Cart Item: " + newCartItem.getCartId());
+                });
+            }
+
+            // Post the Toast message on the main thread
+            new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                Log.d("AddToCart", "User ID: " + userId);
+                Log.d("CartActivity", "User ID: " + userId);
+                Log.d("AddToCart", "Cart item added: userId=" + userId + ", barcode=" + product.getBarcode());
+                Toast.makeText(context, "Added to Cart: " + product.getName(), Toast.LENGTH_SHORT).show();
+            });
+        });
+    }
+
 
 
     @Override

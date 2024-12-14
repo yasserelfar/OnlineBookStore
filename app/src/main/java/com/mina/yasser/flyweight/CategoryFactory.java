@@ -1,4 +1,4 @@
-package com.mina.yasser.factory;
+package com.mina.yasser.flyweight;
 
 import androidx.lifecycle.LiveData;
 

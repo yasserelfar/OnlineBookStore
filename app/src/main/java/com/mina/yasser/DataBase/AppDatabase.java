@@ -6,10 +6,10 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {User.class, Product.class, Cart.class, Order.class, Feedback.class, Category.class}, version = 4)
+@Database(entities = {User.class, Product.class, OrderDetail.class,Cart.class, Order.class, Feedback.class, Category.class}, version = 7)
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase instance;
-
+    public abstract OrderDetailDao orderDetailDao();
     public abstract UserDao userDao();
     public abstract ProductDao productDao();
     public abstract CartDao cartDao();
@@ -30,4 +30,6 @@ public abstract class AppDatabase extends RoomDatabase {
         }
         return instance;
     }
+
+
 }

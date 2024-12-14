@@ -20,6 +20,18 @@
         android:theme="@style/Theme.Yasser"
         tools:targetApi="31">
         <activity
+            android:name=".AdminOrderActivity"
+            android:exported="false" />
+        <activity
+            android:name=".OrderActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CheckoutActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CartActivity"
+            android:exported="false" />
+        <activity
             android:name=".AccountManagementActivity"
             android:exported="false" />
         <activity

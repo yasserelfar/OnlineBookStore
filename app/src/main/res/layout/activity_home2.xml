@@ -40,7 +40,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="8dp" />
 
-        <!-- Account Icon Button (Added) -->
+        <!-- Account Icon Button -->
         <ImageButton
             android:id="@+id/btnAccount"
             android:layout_width="wrap_content"
