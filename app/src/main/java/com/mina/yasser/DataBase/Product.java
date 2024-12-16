@@ -18,24 +18,6 @@ public class Product {
     private double price;
     private int quantityInStock;
     private int popularity;
-    private byte[] image;
-    private double edition;
-
-    public double getEdition() {
-        return edition;
-    }
-
-    public void setEdition(double edition) {
-        this.edition = edition;
-    }
-
-    public byte[] getImage() {
-        return image;
-    }
-
-    public void setImage(byte[] image) {
-        this.image = image;
-    }
 
     // Getters and Setters
     public String getBarcode() {
@@ -94,4 +76,17 @@ public class Product {
         this.popularity = popularity;
     }
 
+    // Optional: Override toString for debugging/logging purposes
+    @Override
+    public String toString() {
+        return "Product{" +
+                "barcode='" + barcode + '\'' +
+                ", name='" + name + '\'' +
+                ", author='" + author + '\'' +
+                ", categoryId=" + categoryId +
+                ", price=" + price +
+                ", quantityInStock=" + quantityInStock +
+                ", popularity=" + popularity +
+                '}';
+    }
 }
