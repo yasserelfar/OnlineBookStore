@@ -30,7 +30,7 @@ import java.util.List;
 public class EditProductActivity extends AppCompatActivity {
 
     private Spinner spinnerCategory;
-    private EditText edtName, edtPrice, edtQuantity,edtEdition;
+    private EditText edtName, edtPrice, edtQuantity;
     private Button btnSave;
     private ProductDao productDao;
     private Product product;
@@ -46,7 +46,6 @@ public class EditProductActivity extends AppCompatActivity {
         // Initialize views
         edtName = findViewById(R.id.edtProductName);
         edtPrice = findViewById(R.id.edtProductPrice);
-        edtEdition = findViewById(R.id.edtProductEdition);
         edtQuantity = findViewById(R.id.edtProductQuantity);
         btnSave = findViewById(R.id.btnSaveProduct);
         spinnerCategory = findViewById(R.id.spinnerCategory);
@@ -103,7 +102,7 @@ public class EditProductActivity extends AppCompatActivity {
                 edtName.setText(product.getName());
                 edtPrice.setText(String.valueOf(product.getPrice()));
                 edtQuantity.setText(String.valueOf(product.getQuantityInStock()));
-                edtEdition.setText(String.valueOf(product.getEdition()));
+
                 // Populate category spinner after product details are fetched
                 if (categoryAdapter != null) {
                     categoryViewModel.getCategoryById(product.getCategoryId()).observe(this, new Observer<Category>() {
@@ -138,7 +137,6 @@ public class EditProductActivity extends AppCompatActivity {
 
         String updatedName = edtName.getText().toString().trim();
         String updatedPrice = edtPrice.getText().toString().trim();
-        String updatedEdition = edtEdition.getText().toString().trim();
         String updatedQuantity = edtQuantity.getText().toString().trim();
         String updatedCategory = spinnerCategory.getSelectedItem() != null ? spinnerCategory.getSelectedItem().toString() : null;
 
@@ -148,13 +146,12 @@ public class EditProductActivity extends AppCompatActivity {
             return;
         }
 
-        double price,edition;
+        double price;
         int quantity;
 
         // Ensure valid price and quantity
         try {
             price = Double.parseDouble(updatedPrice);
-            edition = Double.parseDouble(updatedEdition);
             quantity = Integer.parseInt(updatedQuantity);
         } catch (NumberFormatException e) {
             Toast.makeText(this, "Invalid price or quantity format.", Toast.LENGTH_SHORT).show();
@@ -174,7 +171,7 @@ public class EditProductActivity extends AppCompatActivity {
                             product.setPrice(price);
                             product.setQuantityInStock(quantity);
                             product.setCategoryId(category.getId());  // Set the correct category ID
-                            product.setEdition(edition);
+
                             // Run database operation on a background thread using Executor
                             executor.execute(() -> {
                                 try {
