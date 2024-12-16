@@ -41,14 +41,6 @@
         android:text="Popularity: 5/5"
         android:textSize="14sp"
         android:layout_marginBottom="8dp" />
-    <!--Edition-->
-    <TextView
-        android:id="@+id/productEdition"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Edition: 0.0"
-        android:textSize="14sp"
-        android:layout_marginBottom="8dp" />
 
     <!-- Price -->
     <TextView

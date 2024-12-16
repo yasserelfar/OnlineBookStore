@@ -3,17 +3,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp">
-    <!-- Product Image -->
-    <ImageView
-        android:id="@+id/productImage"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_gravity="center"
-        android:scaleType="centerCrop"
-        android:src="@drawable/cat6"
-        android:layout_marginBottom="8dp" />
 
-    <!--    Name-->
     <TextView
         android:id="@+id/productName"
         android:layout_width="wrap_content"
@@ -21,35 +11,6 @@
         android:text="Product Name"
         android:textSize="16sp"
         android:layout_marginBottom="8dp"/>
-
-    <!-- Author -->
-    <TextView
-        android:id="@+id/productAuthor"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Author: Author Name"
-        android:textSize="14sp"
-        android:layout_marginBottom="4dp" />
-
-    <!-- Popularity -->
-    <TextView
-        android:id="@+id/productPopularity"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Popularity: 5/5"
-        android:textSize="14sp"
-        android:layout_marginBottom="8dp" />
-
-    <!--Edition-->
-    <TextView
-        android:id="@+id/productEdition"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Edition: 0.0"
-        android:textSize="14sp"
-        android:layout_marginBottom="8dp" />
-
-    <!--    Barcode-->
     <TextView
         android:id="@+id/productBarcode"
         android:layout_width="wrap_content"
@@ -57,9 +18,6 @@
         android:text="Barcode: "
         android:textSize="16sp"
         android:layout_marginTop="8dp"/>
-
-    <!--    Category-->
-
     <TextView
         android:id="@+id/productcategory"
         android:layout_width="wrap_content"
@@ -67,9 +25,6 @@
         android:text="category: "
         android:textSize="16sp"
         android:layout_marginTop="8dp"/>
-
-    <!--    Price-->
-
     <TextView
         android:id="@+id/productPrice"
         android:layout_width="wrap_content"
@@ -78,13 +33,13 @@
         android:textSize="14sp"
         android:layout_marginBottom="8dp"/>
 
-    <!--Edit-->
+    <!-- Admin-specific actions (Edit, Delete buttons) -->
     <Button
         android:id="@+id/btnEdit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Edit" />
-        <!--Delete-->
+
     <Button
         android:id="@+id/btnDelete"
         android:layout_width="wrap_content"

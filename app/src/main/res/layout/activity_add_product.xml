@@ -1,109 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
 
-    <LinearLayout
+    <!-- Title or Toolbar -->
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:text="Add New Book"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:padding="16dp" />
 
-        <!-- Title or Toolbar -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Add New Book"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:padding="16dp" />
+    <!-- Product Name Input -->
+    <EditText
+        android:id="@+id/etProductName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Product Name"
+        android:inputType="text"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp"/>
 
-        <!-- Product Name Input -->
-        <EditText
-            android:id="@+id/etProductName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter Product Name"
-            android:inputType="text"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp"/>
+    <!-- Author Input -->
+    <EditText
+        android:id="@+id/etProductAuthor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Author Name"
+        android:inputType="text"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp"/>
 
-        <!-- Author Input -->
-        <EditText
-            android:id="@+id/etProductAuthor"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter Author Name"
-            android:inputType="text"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp"/>
+    <!-- Category Input -->
+    <Spinner
+        android:id="@+id/spinnerCategory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:spinnerMode="dropdown"
+        />
+    <!-- Price Input -->
+    <EditText
+        android:id="@+id/etProductPrice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Price"
+        android:inputType="numberDecimal"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp"/>
 
-        <!-- Category Input -->
-        <Spinner
-            android:id="@+id/spinnerCategory"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:spinnerMode="dropdown"
-            />
+    <!-- Quantity Input -->
+    <EditText
+        android:id="@+id/etProductQuantity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Quantity"
+        android:inputType="number"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp"/>
 
-        <!-- Price Input -->
-        <EditText
-            android:id="@+id/etProductPrice"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter Price"
-            android:inputType="numberDecimal"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp"/>
+    <!-- Save Button -->
+    <Button
+        android:id="@+id/btnSaveProduct"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save Product"
+        android:textColor="#FFFFFF"
+        android:background="@color/grey"/>
 
-        <!-- Quantity Input -->
-        <EditText
-            android:id="@+id/etProductQuantity"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter Quantity"
-            android:inputType="number"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp"/>
-
-        <!-- edition Input -->
-
-        <EditText
-            android:id="@+id/etProductEdition"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter Edition"
-            android:inputType="number"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp"/>
-        <!-- Select Image Button -->
-        <Button
-            android:id="@+id/btnSelectImage"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Select Image"
-            android:layout_marginBottom="16dp"
-            android:textColor="#FFFFFF" />
-
-        <!-- Image Preview -->
-        <ImageView
-            android:id="@+id/ivProductImage"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:scaleType="centerCrop"
-            android:layout_marginBottom="16dp"
-            android:background="@android:color/darker_gray"
-            android:contentDescription="Selected Product Image" />
-
-        <!-- Save Button -->
-        <Button
-            android:id="@+id/btnSaveProduct"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Save Product"
-            android:textColor="#FFFFFF"
-            android:background="@color/grey"/>
-    </LinearLayout>
-</ScrollView>
+</LinearLayout>
