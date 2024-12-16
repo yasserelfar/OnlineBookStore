@@ -79,4 +79,13 @@ public class Order {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    @Override
+    public String toString() {
+        return "Book: " + bookName + "\n" +
+                "Price: $" + price + "\n" ;
+//               + "Category: " + category + "\n" +
+//                "Date: " + date + "\n" +
+//                "Status: " + status;
+    }
 }

@@ -34,4 +34,8 @@ public interface OrderDao {
     // Get all orders for a specific user with their book names
     @Query("SELECT * FROM `orders` WHERE userName = :userName")
     LiveData<List<Order>> getOrdersByUserName(String userName);
+
+    @Query("SELECT * FROM orders WHERE date = :date")
+    LiveData<List<Order>> getOrdersByDate(String date);
+
 }
