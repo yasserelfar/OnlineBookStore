@@ -45,7 +45,7 @@
         android:drawablePadding="10dp"
         android:elevation="3dp"
         android:hint="password"
-        android:inputType="numberPassword"
+        android:inputType="text|textPassword"
         android:padding="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

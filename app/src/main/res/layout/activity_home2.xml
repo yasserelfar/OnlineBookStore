@@ -45,7 +45,7 @@
             android:id="@+id/btnAccount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/user"
+            android:src="@drawable/user_1"
             android:contentDescription="Account"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="8dp"
@@ -66,5 +66,14 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/productList"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="556dp" />
+
+    <!-- View Cart Button -->
+    <Button
+        android:id="@+id/btnViewCart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View Cart (0)"
+        android:layout_marginTop="16dp"
+        android:onClick="onViewCartClicked" />
 </LinearLayout>
