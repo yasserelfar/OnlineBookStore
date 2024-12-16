@@ -1,5 +1,6 @@
 package com.mina.yasser;
-
+import com.mina.yasser.DataBase.CartManager;
+import com.mina.yasser.DataBase.CartItem;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,6 +8,7 @@ import android.speech.RecognizerIntent;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -34,20 +36,30 @@ public class HomeActivity extends AppCompatActivity {
 
     private ProductDao productDao;
     private ProductAdapter productAdapter;
-
+    private Button btnViewCart;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home2);
 
+        btnViewCart =findViewById(R.id.btnViewCart);
         EditText edtSearch = findViewById(R.id.edtSearch);
         ImageButton btnVoiceSearch = findViewById(R.id.btnVoiceSearch);
         ImageButton btnBarcodeSearch = findViewById(R.id.btnBarcodeSearch);
         ImageButton btnAccount = findViewById(R.id.btnAccount);
         RecyclerView productList = findViewById(R.id.productList);
         productList.setLayoutManager(new LinearLayoutManager(this));
-        productAdapter = new ProductAdapter(this, new ArrayList<>(), false, productDao);
+        productAdapter = new ProductAdapter(this, new ArrayList<>(), false, productDao,btnViewCart);
         productList.setAdapter(productAdapter);
+
+//        productAdapter = new ProductAdapter(this, new ArrayList<>(), false, productDao, btnViewCart);//cart view btn
+        // view cart button navigate to CartActivity
+        btnViewCart.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, CartActivity.class);
+            startActivity(intent);
+        });
+        // Update the cart count whenever the activity starts
+        updateCartCount();
 
         AppDatabase database = AppDatabase.getInstance(this);
         productDao = database.productDao();
@@ -137,6 +149,14 @@ public class HomeActivity extends AppCompatActivity {
                 runOnUiThread(() -> Toast.makeText(this, "Product not found", Toast.LENGTH_SHORT).show());
             }
         }).start();
+    }
+
+    public void updateCartCount() {
+        int totalItems = 0;
+        for (CartItem item : CartManager.getInstance().getCartItems()) {
+            totalItems += item.getQuantity();
+        }
+        btnViewCart.setText("View Cart (" + totalItems + ")");
     }
 
 }

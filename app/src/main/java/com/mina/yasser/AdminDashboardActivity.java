@@ -28,9 +28,9 @@ public class AdminDashboardActivity extends AppCompatActivity {
              startActivity(new Intent(AdminDashboardActivity.this, ManageCategoriesActivity.class))
          );
 //
-//         processOrdersButton.setOnClickListener(v ->
-//             startActivity(new Intent(AdminDashboardActivity.this, ProcessOrdersActivity.class))
-//         );
+         processOrdersButton.setOnClickListener(v ->
+             startActivity(new Intent(AdminDashboardActivity.this, OrdersAdmin.class))
+         );
 //
 //         viewPerformanceButton.setOnClickListener(v ->
 //             startActivity(new Intent(AdminDashboardActivity.this, ViewPerformanceActivity.class))
