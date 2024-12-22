@@ -14,10 +14,12 @@
 
     <EditText
         android:id="@+id/editTextDate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="yyyy-MM-dd"
-        android:inputType="date" />
+        android:hint="Birthdate"
+        android:layout_width="296dp"
+        android:layout_height="48dp"
+        android:focusable="false"
+        android:clickable="true"
+       />
 
     <Button
         android:id="@+id/generateReportButton"

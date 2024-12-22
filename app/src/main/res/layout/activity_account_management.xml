@@ -9,33 +9,43 @@
         android:id="@+id/etUsername"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Username" />
+        android:hint="Username"
+        android:minHeight="48dp" />
 
     <EditText
         android:id="@+id/etEmail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Email" />
-
+        android:hint="Email"
+        android:minHeight="48dp" />
+    <EditText
+        android:id="@+id/etPass"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Password"
+        android:minHeight="48dp" />
     <EditText
         android:id="@+id/etAddress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Address" />
+        android:hint="Address"
+        android:minHeight="48dp" />
 
     <EditText
         android:id="@+id/etPhone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Phone" />
+        android:hint="Phone"
+        android:minHeight="48dp" />
 
-    <TextView
+    <EditText
         android:id="@+id/tvBirthdate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Birthdate"
-        android:padding="8dp" />
-
+        android:hint="Birthdate"
+        android:layout_width="296dp"
+        android:layout_height="48dp"
+        android:focusable="false"
+        android:clickable="true"
+       />
     <Button
         android:id="@+id/btnUpdate"
         android:layout_width="match_parent"

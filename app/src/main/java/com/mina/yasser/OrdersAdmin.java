@@ -1,5 +1,6 @@
 package com.mina.yasser;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +17,7 @@ import com.mina.yasser.Adapter.OrderAdapter;
 import com.mina.yasser.DataBase.Order;
 import com.mina.yasser.ViewModel.OrderViewModel;
 
+import java.util.Calendar;
 import java.util.List;
 
 public class OrdersAdmin extends AppCompatActivity {
@@ -39,6 +41,18 @@ public class OrdersAdmin extends AppCompatActivity {
         recyclerViewOrders.setLayoutManager(new LinearLayoutManager(this));
         orderViewModel = new ViewModelProvider(this).get(OrderViewModel.class);
 
+        editTextDate.setOnClickListener(v -> {
+            Calendar calendar = Calendar.getInstance();
+            int year = calendar.get(Calendar.YEAR);
+            int month = calendar.get(Calendar.MONTH);
+            int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+
+            DatePickerDialog datePickerDialog = new DatePickerDialog(this,
+                    (view, year1, month1, dayOfMonth1) -> editTextDate.setText(year1 + "-" + (month1 + 1) + "-" + dayOfMonth1),
+                    year, month, dayOfMonth);
+
+            datePickerDialog.show();
+        });
         generateReportButton.setOnClickListener(v -> {
             String selectedDate = editTextDate.getText().toString().trim();
             if (selectedDate.isEmpty()) {

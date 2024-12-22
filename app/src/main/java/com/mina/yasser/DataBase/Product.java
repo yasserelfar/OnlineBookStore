@@ -18,6 +18,16 @@ public class Product {
     private double price;
     private int quantityInStock;
     private int popularity;
+    private byte[] image;
+    private double edition;
+
+    public double getEdition() {
+        return edition;
+    }
+
+    public void setEdition(double edition) {
+        this.edition = edition;
+    }
 
     // Getters and Setters
     public String getBarcode() {
@@ -74,6 +84,13 @@ public class Product {
 
     public void setPopularity(int popularity) {
         this.popularity = popularity;
+    }
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
     }
 
     // Optional: Override toString for debugging/logging purposes

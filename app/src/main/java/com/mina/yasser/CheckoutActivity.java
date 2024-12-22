@@ -1,5 +1,6 @@
 package com.mina.yasser;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
@@ -20,6 +21,7 @@ import com.mina.yasser.DataBase.Order;
 import com.mina.yasser.Adapter.CheckoutAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -95,6 +97,9 @@ public class CheckoutActivity extends AppCompatActivity {
             // Clear the cart and navigate back
             CartManager.getInstance().clearCart(); // Assuming a CartManager exists for cart management
             finish();
+            Intent intent = new Intent(this, HomeActivity.class);
+            intent.putExtra("cartItems", (Serializable) CartManager.getInstance().getCartItems());
+            startActivity(intent);
         });
 
     }

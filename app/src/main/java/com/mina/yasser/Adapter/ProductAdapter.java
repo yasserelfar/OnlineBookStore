@@ -13,7 +13,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import android.graphics.BitmapFactory;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
@@ -33,6 +33,45 @@ import com.mina.yasser.R;
 
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
+import android.os.Looper;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.mina.yasser.AddProductActivity;
+import com.mina.yasser.DataBase.AppDatabase;
+import com.mina.yasser.DataBase.Cart;
+import com.mina.yasser.DataBase.CartDao;
+import com.mina.yasser.DataBase.Category;
+import com.mina.yasser.DataBase.CategoryDao;
+import com.mina.yasser.DataBase.Product;
+import com.mina.yasser.DataBase.ProductDao;
+import com.mina.yasser.EditProductActivity;
+import com.mina.yasser.ManageBooksActivity;
+import com.mina.yasser.R;
+
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Handler;
 public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Button btnViewCart; //view cart button
@@ -72,7 +111,7 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     // ViewHolder for User
     static class ProductUserViewHolder extends RecyclerView.ViewHolder {
-        TextView nameTextView, priceTextView,populartiy,author;
+        TextView nameTextView, priceTextView,populartiy,author,edition;
         ImageView productImageView;
         Button btnAddToCart;
 
@@ -81,6 +120,7 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             nameTextView = itemView.findViewById(R.id.productName);
             priceTextView = itemView.findViewById(R.id.productPrice);
             author=itemView.findViewById(R.id.productAuthor);
+            edition=itemView.findViewById(R.id.productEdition);
             populartiy=itemView.findViewById(R.id.productPopularity);
             productImageView = itemView.findViewById(R.id.productImage);  // ImageView for product image
             btnAddToCart = itemView.findViewById(R.id.btnAddToCart);  // Button for Add to Cart
@@ -89,16 +129,20 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     // ViewHolder for Admin
     static class ProductAdminViewHolder extends RecyclerView.ViewHolder {
-        TextView nameTextView, priceTextView, barcodeTextView,category;
+        TextView nameTextView, priceTextView, barcodeTextView,category,author,edition,populartiy;
         ImageView productImageView;
         Button btnEdit, btnDelete;
 
         public ProductAdminViewHolder(View itemView) {
             super(itemView);
             nameTextView = itemView.findViewById(R.id.productName);
+            author=itemView.findViewById(R.id.productAuthor);
+            populartiy=itemView.findViewById(R.id.productPopularity);
+            edition=itemView.findViewById(R.id.productEdition);
             priceTextView = itemView.findViewById(R.id.productPrice);
             barcodeTextView = itemView.findViewById(R.id.productBarcode);
             category=itemView.findViewById(R.id.productcategory);
+            productImageView=itemView.findViewById(R.id.productImage);
             btnEdit = itemView.findViewById(R.id.btnEdit);
             btnDelete = itemView.findViewById(R.id.btnDelete);
         }
@@ -131,9 +175,13 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if (holder instanceof ProductAdminViewHolder) {
             // Set product name, price, and barcode for admin view
             ((ProductAdminViewHolder) holder).nameTextView.setText(product.getName());
+            ((ProductAdminViewHolder) holder).productImageView.setImageBitmap(BitmapFactory.decodeByteArray(product.getImage(), 0, product.getImage().length));
             ((ProductAdminViewHolder) holder).priceTextView.setText("Price: $" + product.getPrice());
+            ((ProductAdminViewHolder) holder).edition.setText("Edition: " + product.getEdition());
             ((ProductAdminViewHolder) holder).barcodeTextView.setText("Barcode: " + product.getBarcode());
             ((ProductAdminViewHolder) holder).category.setText("Category: Loading..."); // Temporary loading text
+            ((ProductAdminViewHolder) holder).author.setText(product.getAuthor());
+            ((ProductAdminViewHolder) holder).populartiy.setText("popularity:"+product.getPopularity()); //Temporary loading text
 
             categoryDao = AppDatabase.getInstance(context).categoryDao(); // Ensure this is not null
 
@@ -169,6 +217,8 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             ((ProductUserViewHolder) holder).nameTextView.setText(product.getName());
             ((ProductUserViewHolder) holder).author.setText(product.getAuthor());
             ((ProductUserViewHolder) holder).populartiy.setText("popularity:"+product.getPopularity());
+            ((ProductUserViewHolder) holder).productImageView.setImageBitmap(BitmapFactory.decodeByteArray(product.getImage(), 0, product.getImage().length));
+            ((ProductUserViewHolder) holder).edition.setText("Edition :"+ product.getEdition());
             ((ProductUserViewHolder) holder).priceTextView.setText("Price: $" + product.getPrice());
 
             // Handle Add to Cart button click

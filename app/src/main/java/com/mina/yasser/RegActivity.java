@@ -109,7 +109,7 @@ public class RegActivity extends AppCompatActivity {
                 // Navigate to MainActivity on success
                 runOnUiThread(() -> {
                     Toast.makeText(this, "User registered successfully!", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(this, HomeActivity.class);
+                    Intent intent = new Intent(this, LoginActivity.class);
                     startActivity(intent);
                     finish(); // Close current activity
                 });

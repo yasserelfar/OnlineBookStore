@@ -45,14 +45,33 @@
             android:id="@+id/btnAccount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/user_1"
+            android:src="@drawable/user"
             android:contentDescription="Account"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="8dp"
-            android:layout_gravity="end" /> <!-- Align to the right side -->
+            android:layout_gravity="end" /> <!-- Align to the right side -->
 
     </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
+        <TextView
+            android:id="@+id/catText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fillter By category "
+            android:textSize="18sp"
+            android:layout_marginStart="16dp" />
 
+        <Spinner
+            android:id="@+id/spinnerCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp" />
+    </LinearLayout>
     <!-- Title Text -->
     <TextView
         android:id="@+id/titleText"
@@ -66,7 +85,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/productList"
         android:layout_width="match_parent"
-        android:layout_height="556dp" />
+        android:layout_height="466dp" />
 
     <!-- View Cart Button -->
     <Button

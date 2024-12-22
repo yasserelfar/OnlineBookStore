@@ -46,4 +46,6 @@ public interface ProductDao {
     // Search by title or author, returns LiveData
     @Query("SELECT * FROM product WHERE name LIKE :query OR author LIKE :query")
     LiveData<List<Product>> searchByTitleOrAuthor(String query);
+    @Query("SELECT * FROM product WHERE name = :name  ")
+    LiveData<Product> getproductbyname(String name);
 }
