@@ -1,31 +1,34 @@
 package com.mina.yasser.DataBase;
 
 import androidx.room.Entity;
+import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
-
 @Entity(tableName = "orders")
 public class Order {
     @PrimaryKey(autoGenerate = true)
     private int orderId;
-    private int userId;
-    private int cartId;
 
-    public int getCartId() {
-        return cartId;
-    }
-
-    public void setCartId(int cartId) {
-        this.cartId = cartId;
-    }
-
+    private int userId; // Keep userId to link to the user
+    private int cartId; // Foreign key linking to Cart table
     private String userName;
-    private String bookName;
     private double price;
-    private String category;
-    private String date;
     private String status;
+    private String currentDate;
+    private  String Date;
 
-    // Getters and Setters
+    public String getDate() {
+        return Date;
+    }
+
+    public String getCurrentDate() {
+        return currentDate;
+    }
+
+    public void setCurrentDate(String currentDate) {
+        this.currentDate = currentDate;
+    }
+
+    // Getters and setters
     public int getOrderId() {
         return orderId;
     }
@@ -42,20 +45,20 @@ public class Order {
         this.userId = userId;
     }
 
+    public int getCartId() {
+        return cartId;
+    }
+
+    public void setCartId(int cartId) {
+        this.cartId = cartId;
+    }
+
     public String getUserName() {
         return userName;
     }
 
     public void setUserName(String userName) {
         this.userName = userName;
-    }
-
-    public String getBookName() {
-        return bookName;
-    }
-
-    public void setBookName(String bookName) {
-        this.bookName = bookName;
     }
 
     public double getPrice() {
@@ -66,22 +69,6 @@ public class Order {
         this.price = price;
     }
 
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
-
     public String getStatus() {
         return status;
     }
@@ -90,5 +77,7 @@ public class Order {
         this.status = status;
     }
 
-
+    public void setDate(String currentDate) {
+        this.currentDate=currentDate;
+    }
 }

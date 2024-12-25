@@ -1,6 +1,7 @@
 package com.mina.yasser.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.mina.yasser.DataBase.Category;
 import com.mina.yasser.DataBase.CategoryDao;
+import com.mina.yasser.EditCategoryActivity;
+import com.mina.yasser.EditProductActivity;
 import com.mina.yasser.ManageCategoriesActivity;
 import com.mina.yasser.R;
 
@@ -62,13 +65,18 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
                 });
             }).start();
         });
+        holder.btnEdit.setOnClickListener(v -> {
+            Intent intent = new Intent(context, EditCategoryActivity.class);
+            intent.putExtra("CategoryId", category.getId());
+            context.startActivity(intent);
+        });
     }
 
     @Override
     public int getItemCount() {
         return categoryList.size();
     }
-
+    
     public static class CategoryViewHolder extends RecyclerView.ViewHolder {
         TextView txtCategoryName;
         Button btnEdit, btnDelete;
@@ -76,6 +84,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         public CategoryViewHolder(View itemView) {
             super(itemView);
             txtCategoryName = itemView.findViewById(R.id.txtCategoryName);
+            btnEdit=itemView.findViewById(R.id.btnEdit);
             btnDelete = itemView.findViewById(R.id.btnDelete);
         }
     }

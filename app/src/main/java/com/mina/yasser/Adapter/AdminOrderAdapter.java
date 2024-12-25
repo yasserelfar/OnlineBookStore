@@ -66,26 +66,35 @@ public class AdminOrderAdapter extends RecyclerView.Adapter<AdminOrderAdapter.Or
                         "\nPrice: $" + String.format("%.2f", order.getPrice()) +
                         "\nStatus: " + order.getStatus()
         );
+        if ("Canceled".equals(order.getStatus())||"Shipping".equals(order.getStatus()))
+        {
+            holder.confirmButton.setEnabled(false);
+            holder.cancelButton.setEnabled(false);
+        }
+        holder.cancelButton.setOnClickListener(v -> {
+            order.setStatus("Canceled");
+            updateOrder(order,"Order Canceld");
 
-        // Fetch and display books in the order asynchronously
+            holder.cancelButton.setEnabled(false);
+        });
+        holder.confirmButton.setOnClickListener(v -> {
+
+            order.setStatus("Confirmed");
+            updateOrder(order,"Confirmed");
+            holder.confirmButton.setEnabled(false);
+            holder.cancelButton.setEnabled(false);
+        });
+        // Fetch cart items for this order asynchronously using cartId
         Executors.newSingleThreadExecutor().execute(() -> {
-            List<Cart> cartItems = cartDao.getCartItemsByUserId(order.getUserId());
-            if (cartItems == null || cartItems.isEmpty()) {
-                ((AppCompatActivity) context).runOnUiThread(() -> holder.booksDetails.setText("No books in this order."));
-                return;
-            }
-
-            List<String> barcodes = new ArrayList<>();
-            for (Cart cart : cartItems) {
-                barcodes.add(cart.getProductBarcode());
-            }
-
-            List<Product> products = productDao.getProductsByBarcodes(barcodes);
+            // Fetch cart items associated with the order using the cartId
+            List<Cart> cartItems = cartDao.getCartItemsByCartId(order.getCartId());
 
             StringBuilder bookDetails = new StringBuilder();
-            for (Cart cart : cartItems) {
-                for (Product product : products) {
-                    if (cart.getProductBarcode().equals(product.getBarcode())) {
+            if (cartItems != null && !cartItems.isEmpty()) {
+                for (Cart cart : cartItems) {
+                    // Fetch product details for each cart item
+                    Product product = productDao.getProductByBarcodes(cart.getProductBarcode());
+                    if (product != null) {
                         bookDetails.append("- ")
                                 .append(product.getName())
                                 .append(" (Qty: ")
@@ -95,30 +104,17 @@ public class AdminOrderAdapter extends RecyclerView.Adapter<AdminOrderAdapter.Or
                 }
             }
 
-            String finalBookDetails = bookDetails.toString().trim();
-            ((AppCompatActivity) context).runOnUiThread(() -> holder.booksDetails.setText(finalBookDetails.isEmpty() ? "No books in this order." : finalBookDetails));
+            // If no cart items found, display a default message
+            String finalBookDetails = bookDetails.length() > 0 ? bookDetails.toString().trim() : "No books in this order.";
+
+            // Update the UI with the final book details
+            ((AppCompatActivity) context).runOnUiThread(() -> {
+                holder.booksDetails.setText(finalBookDetails);
+            });
         });
 
-        // Handle confirm button
-        holder.confirmButton.setOnClickListener(v -> {
-            if (!order.getStatus().equals("Pending")) {
-                Toast.makeText(context, "Order already processed!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            order.setStatus("Confirmed");
-            updateOrder(order, "Order confirmed!");
-        });
-
-        // Handle cancel button
-        holder.cancelButton.setOnClickListener(v -> {
-            if (!order.getStatus().equals("Pending")) {
-                Toast.makeText(context, "Order already processed!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            order.setStatus("Canceled");
-            updateOrder(order, "Order canceled!");
-        });
     }
+
 
 
     private void updateOrder(Order order, String message) {

@@ -1,92 +1,122 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    android:gravity="center_horizontal">
+    android:fillViewport="true">
 
-    <!-- Product Name -->
-    <TextView
-        android:id="@+id/txtProductName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Product Name"
-        android:textSize="16sp"
-        android:layout_marginBottom="8dp"/>
-
-    <EditText
-        android:id="@+id/edtProductName"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter product name"
-        android:inputType="text"
-        android:layout_marginBottom="16dp"/>
+        android:padding="16dp"
+        android:gravity="center_horizontal">
 
-    <Spinner
-        android:id="@+id/spinnerCategory"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:spinnerMode="dropdown"
-        />
-    <!-- Product Price -->
-    <TextView
-        android:id="@+id/txtProductPrice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Price"
-        android:textSize="16sp"
-        android:layout_marginBottom="8dp"/>
+        <!-- Product Name -->
+        <TextView
+            android:id="@+id/txtProductName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Product Name"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp"/>
 
-    <EditText
-        android:id="@+id/edtProductPrice"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Enter product price"
-        android:inputType="numberDecimal"
-        android:layout_marginBottom="16dp"/>
+        <EditText
+            android:id="@+id/edtProductName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:hint="Enter product name"
+            android:inputType="text"
+            android:minHeight="48dp" />
 
-    <!-- Product Quantity -->
-    <TextView
-        android:id="@+id/txtProductQuantity"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Quantity"
-        android:textSize="16sp"
-        android:layout_marginBottom="8dp"/>
+        <Spinner
+            android:id="@+id/spinnerCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:minHeight="48dp"
+            android:spinnerMode="dropdown" />
 
-    <EditText
-        android:id="@+id/edtProductQuantity"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Enter product quantity"
-        android:inputType="number"
-        android:layout_marginBottom="16dp"/>
-    <!-- edition Input -->
-    <TextView
-        android:id="@+id/txtProductEdition"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Edition"
-        android:textSize="16sp"
-        android:layout_marginBottom="8dp"/>
+        <!-- Product Price -->
+        <TextView
+            android:id="@+id/txtProductPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Price"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp"/>
 
-    <EditText
-        android:id="@+id/edtProductEdition"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Enter Edition"
-        android:inputType="number"
-        android:padding="12dp"
-        android:layout_marginBottom="12dp"/>
+        <EditText
+            android:id="@+id/edtProductPrice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:hint="Enter product price"
+            android:inputType="numberDecimal"
+            android:minHeight="48dp" />
 
-    <!-- Save Button -->
-    <Button
-        android:id="@+id/btnSaveProduct"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Save"
-        android:layout_marginTop="16dp"/>
+        <!-- Product Quantity -->
+        <TextView
+            android:id="@+id/txtProductQuantity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Quantity"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp"/>
 
-</LinearLayout>
+        <EditText
+            android:id="@+id/edtProductQuantity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:hint="Enter product quantity"
+            android:inputType="number"
+            android:minHeight="48dp" />
+
+        <!-- Edition Input -->
+        <TextView
+            android:id="@+id/txtProductEdition"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edition"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/edtProductEdition"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Edition"
+            android:inputType="number"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Select Image Button -->
+        <Button
+            android:id="@+id/btnSelectImage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Select Image"
+            android:layout_marginBottom="16dp"
+            android:textColor="#FFFFFF" />
+
+        <!-- Image Preview -->
+        <ImageView
+            android:id="@+id/edtProductImage"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop"
+            android:layout_marginBottom="16dp"
+            android:background="@android:color/darker_gray"
+            android:contentDescription="Selected Product Image" />
+
+        <!-- Save Button -->
+        <Button
+            android:id="@+id/btnSaveProduct"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Save" />
+
+    </LinearLayout>
+</ScrollView>

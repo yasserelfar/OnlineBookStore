@@ -1,5 +1,41 @@
 package com.mina.yasser.Adapter;
 
+import com.mina.yasser.CartActivity;
+import com.mina.yasser.HomeActivity;
+
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.graphics.BitmapFactory;
+import androidx.annotation.NonNull;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.mina.yasser.AddProductActivity;
+import com.mina.yasser.DataBase.AppDatabase;
+
+import com.mina.yasser.DataBase.Category;
+import com.mina.yasser.DataBase.CategoryDao;
+import com.mina.yasser.DataBase.Product;
+import com.mina.yasser.DataBase.ProductDao;
+import com.mina.yasser.EditProductActivity;
+import com.mina.yasser.ManageBooksActivity;
+import com.mina.yasser.R;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import static android.content.Context.MODE_PRIVATE;
 
 import android.content.Context;
@@ -39,49 +75,42 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Handler;
-
 public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    private Button btnViewCart; //view cart button
     private List<Product> productList;
     private boolean isAdmin;
     private ProductDao productDao;
     private Context context;
     private  CategoryDao categoryDao;
     private LifecycleOwner lifecycleOwner;  // Add LifecycleOwner here
+    private HomeActivity homeActivity;
     private CartDao cartDao;
     private Object holder;
     private SharedPreferences sharedPreferences;
 
     private int userId;
-
     // Update the constructor to accept lifecycleOwner
     public ProductAdapter(Context context, List<Product> productList, boolean isAdmin, ProductDao productDao, LifecycleOwner lifecycleOwner) {
         this.context = context;
         this.isAdmin = isAdmin;
         this.productList = productList;
         this.productDao = productDao;
+        this.btnViewCart = btnViewCart;
         this.lifecycleOwner = lifecycleOwner;
         cartDao = AppDatabase.getInstance(context).cartDao();
-
-    }
-    public ProductAdapter(Context context, List<Product> productList, boolean isAdmin, ProductDao productDao, CartDao cartDao, LifecycleOwner lifecycleOwner) {
-        this.context = context;
-        this.isAdmin = isAdmin;
-        this.productList = productList;
-        this.productDao = productDao;
-        this.cartDao = cartDao; // Ensure CartDao is initialized here
-        this.lifecycleOwner = lifecycleOwner;
-        cartDao = AppDatabase.getInstance(context).cartDao();
-
     }
 
-    public ProductAdapter(Context context, List<Product> productList, boolean isAdmin, ProductDao productDao) {
+    public ProductAdapter(Context context, List<Product> productList, boolean isAdmin, ProductDao productDao,Button btnViewCart) {
         this.context = context;
         this.isAdmin = isAdmin;
         this.productList = productList;
         this.productDao = productDao;
         cartDao = AppDatabase.getInstance(context).cartDao();
-
+        // Cast the context to HomeActivity to access updateCartCount()
+        if (context instanceof HomeActivity) {
+            this.homeActivity = (HomeActivity) context;
+        }
     }
     public void setProductList(List<Product> products) {
         this.productList = products;  // Correctly update the list
@@ -91,18 +120,18 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     // ViewHolder for User
     static class ProductUserViewHolder extends RecyclerView.ViewHolder {
-        TextView nameTextView, priceTextView,populartiy,author,edition;
+        TextView nameTextView, priceTextView,populartiy,author,edition,productAvailable;
         ImageView productImageView;
         Button btnAddToCart;
 
         public ProductUserViewHolder(View itemView) {
-
             super(itemView);
             nameTextView = itemView.findViewById(R.id.productName);
             priceTextView = itemView.findViewById(R.id.productPrice);
             author=itemView.findViewById(R.id.productAuthor);
-            populartiy=itemView.findViewById(R.id.productPopularity);
             edition=itemView.findViewById(R.id.productEdition);
+            populartiy=itemView.findViewById(R.id.productPopularity);
+            productAvailable=itemView.findViewById(R.id.productAvailable);
             productImageView = itemView.findViewById(R.id.productImage);  // ImageView for product image
             btnAddToCart = itemView.findViewById(R.id.btnAddToCart);  // Button for Add to Cart
         }
@@ -110,7 +139,7 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     // ViewHolder for Admin
     static class ProductAdminViewHolder extends RecyclerView.ViewHolder {
-        TextView nameTextView, priceTextView, barcodeTextView,category,populartiy,author,edition;
+        TextView nameTextView, priceTextView, barcodeTextView,category,author,edition,populartiy,quantity;
         ImageView productImageView;
         Button btnEdit, btnDelete;
 
@@ -121,6 +150,7 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             populartiy=itemView.findViewById(R.id.productPopularity);
             edition=itemView.findViewById(R.id.productEdition);
             priceTextView = itemView.findViewById(R.id.productPrice);
+            quantity = itemView.findViewById(R.id.productQuantity);
             barcodeTextView = itemView.findViewById(R.id.productBarcode);
             category=itemView.findViewById(R.id.productcategory);
             productImageView=itemView.findViewById(R.id.productImage);
@@ -152,7 +182,7 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         Product product = productList.get(position);
-
+        SharedPreferences sharedPreferences = context.getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
         if (holder instanceof ProductAdminViewHolder) {
             // Set product name, price, and barcode for admin view
             ((ProductAdminViewHolder) holder).nameTextView.setText(product.getName());
@@ -162,10 +192,20 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             ((ProductAdminViewHolder) holder).barcodeTextView.setText("Barcode: " + product.getBarcode());
             ((ProductAdminViewHolder) holder).category.setText("Category: Loading..."); // Temporary loading text
             ((ProductAdminViewHolder) holder).author.setText(product.getAuthor());
-            ((ProductAdminViewHolder) holder).populartiy.setText("popularity:"+product.getPopularity());
+            ((ProductAdminViewHolder) holder).populartiy.setText("popularity: "+product.getPopularity()); //Temporary loading text
+            if(product.getQuantityInStock()==0)
+            {
+                ((ProductAdminViewHolder) holder).quantity.setText("OUT OF STOCK");
+                ((ProductAdminViewHolder) holder).quantity.setTextColor(Color.parseColor("#FF5722"));
 
+            }
+            else
+            {
+                ((ProductAdminViewHolder) holder).quantity.setText("quantity: "+product.getQuantityInStock());
+            }
             categoryDao = AppDatabase.getInstance(context).categoryDao(); // Ensure this is not null
-                        if (categoryDao != null && lifecycleOwner != null) {
+
+            if (categoryDao != null && lifecycleOwner != null) {
                 categoryDao.getCategoryById(product.getCategoryId()).observe(lifecycleOwner, new Observer<Category>() {
                     @Override
                     public void onChanged(Category category) {
@@ -193,61 +233,35 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             });
         }
         else{
-           // Default -1 if not found
-
             // Set product name and price for the user view
             ((ProductUserViewHolder) holder).nameTextView.setText(product.getName());
             ((ProductUserViewHolder) holder).author.setText(product.getAuthor());
             ((ProductUserViewHolder) holder).populartiy.setText("popularity:"+product.getPopularity());
             ((ProductUserViewHolder) holder).productImageView.setImageBitmap(BitmapFactory.decodeByteArray(product.getImage(), 0, product.getImage().length));
-            ((ProductUserViewHolder) holder).edition.setText("productEdition :"+product.getEdition());
+            ((ProductUserViewHolder) holder).edition.setText("Edition :"+ product.getEdition());
             ((ProductUserViewHolder) holder).priceTextView.setText("Price: $" + product.getPrice());
+            if(product.getQuantityInStock()==0)
+            {
+                ((ProductUserViewHolder) holder).productAvailable.setText("OUT OF STOCK");
+                ((ProductUserViewHolder) holder).productAvailable.setTextColor(Color.parseColor("#FF5722"));
+                ((ProductUserViewHolder) holder).btnAddToCart.setEnabled(false);
+            }
+            else{
+                ((ProductUserViewHolder) holder).productAvailable.setText("Status : Available");
+                ((ProductUserViewHolder) holder).productAvailable.setTextColor(Color.parseColor("#FFFFFF"));
+                ((ProductUserViewHolder) holder).btnAddToCart.setEnabled(true);
+            }
             // Handle Add to Cart button click
 
-            SharedPreferences sharedPreferences = context.getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
-            // Get stored userId
-            userId = sharedPreferences.getInt("userId", -1);
-            ((ProductUserViewHolder) holder).btnAddToCart.setOnClickListener(v -> {
-                addToCart(product,userId);
-                Toast.makeText(context, "Added to Cart: " + product.getName(), Toast.LENGTH_SHORT).show();
-            });
+                // Get stored userId
+                userId = sharedPreferences.getInt("userId", -1);
+                ((ProductUserViewHolder) holder).btnAddToCart.setOnClickListener(s -> {
+                    addToCart(product,userId);
+                    Toast.makeText(context, "Added to Cart: " + product.getName(), Toast.LENGTH_SHORT).show();
+                });
+
         }
     }
-//    public void addToCart(String productBarcode, int quantity) {
-//        ExecutorService executor = Executors.newSingleThreadExecutor();
-//        executor.execute(() -> {
-//            if (cartDao == null) {
-//                Log.e("ProductAdapter", "CartDao is null!");
-//                return;
-//            }
-//
-//
-//
-//            if (userId == -1) {
-//                // Handle error: User not logged in
-//                return;
-//            }
-//
-//            Cart existingCart = cartDao.getCartProduct(userId, productBarcode);
-//            if (existingCart != null) {
-//                // Update existing cart item
-//                cartDao.updateQuantity(userId, productBarcode, existingCart.getQuantity() + quantity);
-//                Log.d("Cart", "Updated product in cart");
-//            } else {
-//                // Insert new product into cart
-//                Cart newCart = new Cart();
-//                newCart.setUserId(userId);
-//                newCart.setProductBarcode(productBarcode);
-//                newCart.setQuantity(quantity);
-//                cartDao.insertProduct(newCart);
-//                Log.d("Cart", "Inserted new product into cart");
-//            }
-//
-//
-//        });
-//    }
-
-
     private void addToCart(Product product, int userId) {
         // Use ExecutorService to perform database operations off the main thread
         ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -279,9 +293,22 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
         });
     }
-
-
-
+    public void sortProducts(String sortBy, boolean ascending) {
+        if (sortBy.equals("popularity")) {
+            Collections.sort(productList, (p1, p2) -> {
+                // Sort by popularity (assuming popularity is an integer)
+                return ascending ? Integer.compare(p1.getPopularity(), p2.getPopularity())
+                        : Integer.compare(p2.getPopularity(), p1.getPopularity());
+            });
+        } else if (sortBy.equals("price")) {
+            Collections.sort(productList, (p1, p2) -> {
+                // Sort by price (assuming price is a double)
+                return ascending ? Double.compare(p1.getPrice(), p2.getPrice())
+                        : Double.compare(p2.getPrice(), p1.getPrice());
+            });
+        }
+        notifyDataSetChanged(); // Update the adapter with the sorted list
+    }
 
     @Override
     public int getItemCount() {
@@ -299,4 +326,5 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             });
         }).start();
     }
+
 }

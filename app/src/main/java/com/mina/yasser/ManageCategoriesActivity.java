@@ -15,12 +15,13 @@ import com.mina.yasser.Adapter.CategoryAdapter;
 import com.mina.yasser.DataBase.AppDatabase;
 import com.mina.yasser.DataBase.Category;
 import com.mina.yasser.DataBase.CategoryDao;
+import com.mina.yasser.factory.CategoryFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ManageCategoriesActivity extends AppCompatActivity {
 
-    private CategoryDao categoryDao;
     private CategoryAdapter categoryAdapter;
 
     @Override
@@ -36,12 +37,25 @@ public class ManageCategoriesActivity extends AppCompatActivity {
         categoryAdapter = new CategoryAdapter(this);
         categoryList.setAdapter(categoryAdapter);
 
+        // Initialize the database and CategoryFactory
         AppDatabase database = AppDatabase.getInstance(this);
-        categoryDao = database.categoryDao();
+        CategoryDao categoryDao = database.categoryDao();
+        CategoryFactory.init(categoryDao);
 
         // Load Categories
-        LiveData<List<Category>> allCategories = categoryDao.getAllCategories();
-        allCategories.observe(this, categories -> categoryAdapter.setCategoryList(categories));
+        categoryDao.getAllCategories().observe(this, categories -> {
+            List<Category> sharedCategories = new ArrayList<>();
+            for (Category category : categories) {
+                // Observe the shared instance of each category
+                LiveData<Category> sharedCategoryLiveData = CategoryFactory.getCategory(category.getName());
+                sharedCategoryLiveData.observe(this, sharedCategory -> {
+                    if (sharedCategory != null && !sharedCategories.contains(sharedCategory)) {
+                        sharedCategories.add(sharedCategory);
+                        categoryAdapter.setCategoryList(sharedCategories);
+                    }
+                });
+            }
+        });
 
         // Add Category
         btnAddCategory.setOnClickListener(v -> {
@@ -50,15 +64,10 @@ public class ManageCategoriesActivity extends AppCompatActivity {
                 Toast.makeText(this, "Category name cannot be empty", Toast.LENGTH_SHORT).show();
                 return;
             }
-            addCategory(name);
+            CategoryFactory.addCategory(name);
             edtCategoryName.setText("");
         });
     }
 
-    private void addCategory(String name) {
-        new Thread(() -> {
-            Category category = new Category(name);
-            categoryDao.insertCategory(category);
-        }).start();
-    }
+
 }

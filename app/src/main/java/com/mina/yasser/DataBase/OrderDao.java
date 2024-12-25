@@ -20,8 +20,7 @@ public interface OrderDao {
     void updateOrder(Order order);
 
     // Get all orders for a specific user
-    @Query("SELECT * FROM `orders` WHERE userId = :userId")
-    List<Order> getUserOrders(int userId);
+
 
     // Get a specific order by ID
     @Query("SELECT * FROM `orders` WHERE orderId = :id")
@@ -35,6 +34,6 @@ public interface OrderDao {
     @Query("SELECT * FROM `orders` WHERE userName = :userName")
     LiveData<List<Order>> getOrdersByUserName(String userName);
 
-
-
+    @Query("SELECT * FROM orders WHERE userId = :userId")
+    List<Order> getUserOrders(int userId);
 }

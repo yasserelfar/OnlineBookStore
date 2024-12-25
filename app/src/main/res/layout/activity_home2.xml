@@ -1,3 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -40,7 +45,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="8dp" />
 
-        <!-- Account Icon Button -->
+        <!-- Account Icon Button (Added) -->
         <ImageButton
             android:id="@+id/btnAccount"
             android:layout_width="wrap_content"
@@ -49,8 +54,51 @@
             android:contentDescription="Account"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="8dp"
-            android:layout_gravity="end" /> <!-- Align to the right side -->
+            android:layout_gravity="end" /> <!-- Align to the right side -->
 
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
+        <TextView
+            android:id="@+id/catText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fillter By category "
+            android:textSize="18sp"
+            android:layout_marginStart="16dp" />
+
+        <Spinner
+            android:id="@+id/spinnerCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:minHeight="48dp" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/sortText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sort By"
+            android:textSize="18sp"
+            android:layout_marginStart="16dp" />
+
+        <Spinner
+            android:id="@+id/spinnerSort"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:minHeight="48dp" />
     </LinearLayout>
 
     <!-- Title Text -->
@@ -66,5 +114,15 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/productList"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="466dp" />
+
+    <!-- View Cart Button -->
+    <Button
+        android:id="@+id/btnViewCart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View Cart (0)"
+        android:layout_marginTop="16dp"
+        android:onClick="onViewCartClicked" />
 </LinearLayout>
+</ScrollView>

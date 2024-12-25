@@ -12,7 +12,7 @@
         android:layout_gravity="center"
         android:scaleType="centerCrop"
         android:src="@drawable/cat6"
-    android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="8dp" />
 
     <!-- Product Name -->
     <TextView
@@ -58,7 +58,14 @@
         android:text="Price: $0.00"
         android:textSize="14sp"
         android:layout_marginBottom="8dp" />
-
+    <!-- status -->
+    <TextView
+        android:id="@+id/productAvailable"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Avilable"
+        android:textSize="14sp"
+        android:layout_marginBottom="8dp" />
     <!-- Add to Cart Button -->
     <Button
         android:id="@+id/btnAddToCart"

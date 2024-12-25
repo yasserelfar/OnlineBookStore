@@ -31,12 +31,17 @@ public interface CartDao {
     void deleteCart(Cart cart);
     @Query("SELECT * FROM Cart WHERE userId = :userId AND productBarcode = :barcode LIMIT 1")
     Cart getCartItemByProductSync(int userId, String barcode);
+    @Query("SELECT * FROM Cart WHERE cartId = :cartId")
+    List<Cart> getCartItemsByOrderId(int cartId);
 
     @Query("SELECT * FROM Cart WHERE userId = :userId AND productBarcode = :barcode LIMIT 1")
     Cart getCartItemByUserIdAndBarcode(String userId, String barcode);
     // Update an existing cart entry
     @Update
     void updateCart(Cart cart);
+
+        @Query("SELECT * FROM cart WHERE cartId = :cartId")
+        List<Cart> getCartItemsByCartId(int cartId);
 
     // Get a cart item by product barcode for a specific user
     @Query("SELECT * FROM cart WHERE userId = :userId AND productBarcode = :productBarcode LIMIT 1")
@@ -53,5 +58,8 @@ public interface CartDao {
     // Check if a product exists in the cart
     @Query("SELECT * FROM cart WHERE userId = :userId AND productBarcode = :productBarcode LIMIT 1")
     LiveData<Cart> getCartItemByProduct(int userId, String productBarcode);
+    @Query("DELETE  FROM Cart WHERE userId = :userId")
+    void clearCartByUserId(int userId);
+
 }
 

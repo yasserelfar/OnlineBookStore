@@ -25,7 +25,7 @@ public class RegActivity extends AppCompatActivity {
     private Button btnSignUp;
     private AppDatabase database;
     private UserDao userDao;
-
+    private SharedPreferences sharedPreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,32 +38,28 @@ public class RegActivity extends AppCompatActivity {
         etAddress = findViewById(R.id.address);
         etPhone = findViewById(R.id.phone);
         etBirthdate = findViewById(R.id.birthdate);
-        btnSignUp = findViewById(R.id.button);
+        sharedPreferences = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
 
         // Initialize the Room database
-        database = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "bookstore_database")
-                .fallbackToDestructiveMigration() // Handle database schema changes
-                .build();
+        database = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "bookstore_database").build();
         userDao = database.userDao();
 
         // Set DatePicker for birthdate
-        etBirthdate.setOnClickListener(v -> showDatePicker());
+        etBirthdate.setOnClickListener(v -> {
+            Calendar calendar = Calendar.getInstance();
+            int year = calendar.get(Calendar.YEAR);
+            int month = calendar.get(Calendar.MONTH);
+            int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
 
-        // Set Sign-Up button click listener
+            DatePickerDialog datePickerDialog = new DatePickerDialog(RegActivity.this,
+                    (view, year1, month1, dayOfMonth1) -> etBirthdate.setText(year1 + "-" + (month1 + 1) + "-" + dayOfMonth1),
+                    year, month, dayOfMonth);
+
+            datePickerDialog.show();
+        });
+
+        btnSignUp = findViewById(R.id.button);
         btnSignUp.setOnClickListener(v -> signUp());
-    }
-
-    private void showDatePicker() {
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
-
-        DatePickerDialog datePickerDialog = new DatePickerDialog(RegActivity.this,
-                (view, selectedYear, selectedMonth, selectedDay) ->
-                        etBirthdate.setText(selectedYear + "-" + (selectedMonth + 1) + "-" + selectedDay),
-                year, month, dayOfMonth);
-        datePickerDialog.show();
     }
 
     // Method for the Sign-Up button
@@ -75,22 +71,29 @@ public class RegActivity extends AppCompatActivity {
         String phone = etPhone.getText().toString().trim();
         String birthdate = etBirthdate.getText().toString().trim();
 
-        // Validate input fields
         if (username.isEmpty() || password.isEmpty() || email.isEmpty() || address.isEmpty() || phone.isEmpty() || birthdate.isEmpty()) {
             Toast.makeText(this, "Please fill out all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // Insert user into the database (in a background thread)
         new Thread(() -> {
             try {
                 // Check if the username already exists
                 User existingUser = userDao.getUserByUsername(username);
                 if (existingUser != null) {
+                    // If user exists, show error message and clear fields
                     runOnUiThread(() -> {
                         Toast.makeText(this, "Username already exists. Please choose another.", Toast.LENGTH_SHORT).show();
-                        clearFields();
+                        // Clear the input fields so the user can retry
+                        etUsername.setText("");
+                        etPassword.setText("");
+                        etEmail.setText("");
+                        etAddress.setText("");
+                        etPhone.setText("");
+                        etBirthdate.setText("");
                     });
-                    return;
+                    return; // Exit the method, as we don't want to insert the user if the username exists
                 }
 
                 // Create a new user object
@@ -101,37 +104,26 @@ public class RegActivity extends AppCompatActivity {
                 newUser.setAddress(address);
                 newUser.setPhone(phone);
                 newUser.setBirthdate(birthdate);
-                newUser.setAdmin(false); // Default: Not an admin
+                newUser.setAdmin(true); // Default: Not an admin
 
                 // Insert into the database
                 userDao.insertUser(newUser);
-
-                // Save user ID in SharedPreferences
-                SharedPreferences sharedPreferences = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
-                sharedPreferences.edit().putInt("userId", newUser.getUserId()).apply();
-
-                // Navigate to HomeActivity on success
+                sharedPreferences.edit()
+                        .putString("Username", username)
+                        .putString("Password", password)
+                        .putInt("userId", newUser.getUserId())
+                        .apply();
+                // Navigate to MainActivity on success
                 runOnUiThread(() -> {
                     Toast.makeText(this, "User registered successfully!", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(this, HomeActivity.class);
+                    Intent intent = new Intent(this, LoginActivity.class);
                     startActivity(intent);
                     finish(); // Close current activity
                 });
             } catch (Exception e) {
-                Log.e("RegActivity", "Error during registration", e);
                 runOnUiThread(() -> Toast.makeText(this, "An error occurred during registration.", Toast.LENGTH_SHORT).show());
             }
         }).start();
-    }
-
-    // Clear input fields
-    private void clearFields() {
-        etUsername.setText("");
-        etPassword.setText("");
-        etEmail.setText("");
-        etAddress.setText("");
-        etPhone.setText("");
-        etBirthdate.setText("");
     }
 
     // Method for the Login button

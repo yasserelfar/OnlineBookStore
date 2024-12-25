@@ -1,15 +1,16 @@
 package com.mina.yasser;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,149 +18,91 @@ import com.mina.yasser.Adapter.CheckoutAdapter;
 import com.mina.yasser.DataBase.AppDatabase;
 import com.mina.yasser.DataBase.Cart;
 import com.mina.yasser.DataBase.CartDao;
-import com.mina.yasser.DataBase.Order;
 import com.mina.yasser.DataBase.OrderDao;
-import com.mina.yasser.Adapter.CartAdapter;
-import com.mina.yasser.DataBase.Product;
 import com.mina.yasser.DataBase.ProductDao;
 import com.mina.yasser.DataBase.UserDao;
+import com.mina.yasser.ViewModel.CheckoutViewModel;
+import com.mina.yasser.factory.CheckoutViewModelFactory;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 public class CheckoutActivity extends AppCompatActivity {
-    private List<Cart> cartList = new ArrayList<>();
-    private double totalPrice;
-    private int userId;
-    private String username;
-    private CartDao cartDao;
+    private CheckoutViewModel checkoutViewModel;
+    private TextView checkoutTotalPrice;
+    private RecyclerView cartRecyclerView;
+    private Button placeOrderButton;
     private UserDao userDao;
+    private CartDao cartDao;
     private OrderDao orderDao;
     private ProductDao productDao;
+    int userId;
     private SharedPreferences sharedPreferences;
-    TextView checkoutTotalPrice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_checkout);
 
-        sharedPreferences = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
-        userId = sharedPreferences.getInt("userId", -1);
-
         // Initialize DAOs
         userDao = AppDatabase.getInstance(this).userDao();
         cartDao = AppDatabase.getInstance(this).cartDao();
         orderDao = AppDatabase.getInstance(this).orderDao();
         productDao = AppDatabase.getInstance(this).productDao();
+        sharedPreferences = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
 
-        // Fetch username asynchronously
-        fetchUsernameAsync();
+        // Get stored userId
+        userId = sharedPreferences.getInt("userId", -1);
 
+        // Initialize ViewModel using the factory
+        checkoutViewModel = new ViewModelProvider(this,
+                new CheckoutViewModelFactory(cartDao, productDao, orderDao,userDao, userId))
+                .get(CheckoutViewModel.class);
+
+        // Initialize UI components
         checkoutTotalPrice = findViewById(R.id.checkoutTotalPrice);
-        RecyclerView cartRecyclerView = findViewById(R.id.cartRecyclerView);
-        Button proceedToPaymentButton = findViewById(R.id.proceedToPaymentButton);
-        Button placeOrderButton = findViewById(R.id.placeOrderButton);
-        TextView orderStatus = findViewById(R.id.orderStatus);
+        cartRecyclerView = findViewById(R.id.cartRecyclerView);
+        placeOrderButton = findViewById(R.id.placeOrderButton);
 
+        // Set up RecyclerView
         cartRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        cartDao.getCartProducts(userId).observe(this, new Observer<List<Cart>>() {
-            @Override
-            public void onChanged(List<Cart> carts) {
-                if (carts != null && !carts.isEmpty()) {
-                    cartList = carts;
-                    calculateTotalPriceAsync(); // Ensure total price is calculated
-
-                    checkoutTotalPrice.setText("Total: $" + String.format("%.2f", totalPrice));
-
-                    // Set up RecyclerView adapter
-                    CheckoutAdapter cartAdapter = new CheckoutAdapter(cartList, productDao, cartDao, CheckoutActivity.this);
-                    cartRecyclerView.setAdapter(cartAdapter);
-
-                    // Enable the place order button
-                    placeOrderButton.setEnabled(true);
-
-                    // Handle "Place Order"
-                    placeOrderButton.setOnClickListener(v -> {
-                        Executors.newSingleThreadExecutor().execute(() -> {
-                            addOrderToDatabase(cartList, totalPrice);
-                            clearCartForUser(userId);
-                            runOnUiThread(() -> {
-                                orderStatus.setText("Order Status: Placed");
-                                Toast.makeText(CheckoutActivity.this, "Order placed successfully!", Toast.LENGTH_SHORT).show();
-                            });
-                        });
-                    });
-                } else {
-                    cartList.clear();
-                    totalPrice = 0; // Reset total price
-                    checkoutTotalPrice.setText("Total: $0.00");
-                    placeOrderButton.setEnabled(false);
-                    Toast.makeText(CheckoutActivity.this, "Your cart is empty!", Toast.LENGTH_SHORT).show();
-                }
+        // Observe cart LiveData
+        checkoutViewModel.getCartLiveData().observe(this, cartList -> {
+            if (cartList != null && !cartList.isEmpty()) {
+                // Update RecyclerView with cart data
+                CheckoutAdapter cartAdapter = new CheckoutAdapter(cartList, productDao, cartDao, this);
+                cartRecyclerView.setAdapter(cartAdapter);
+                placeOrderButton.setEnabled(true);
+            } else {
+                // Handle empty cart case
+                Toast.makeText(this, "Your cart is empty!", Toast.LENGTH_SHORT).show();
+                placeOrderButton.setEnabled(false);
             }
         });
 
-        proceedToPaymentButton.setOnClickListener(v -> {
-            Toast.makeText(this, "Proceeding to payment...", Toast.LENGTH_SHORT).show();
+        // Observe total price LiveData
+        checkoutViewModel.getTotalPriceLiveData().observe(this, totalPrice -> {
+            checkoutTotalPrice.setText("Total: $" + String.format("%.2f", totalPrice));
         });
-    }
 
-    private void fetchUsernameAsync() {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            // Fetch username in the background
-            username = userDao.getUserById(userId).getUsername();
-            Log.d("username", "userName: " + username);
-        });
-    }
+        // Handle Place Order button click
+        placeOrderButton.setOnClickListener(v -> {
+            // Get current cart data and total price
+            List<Cart> currentCart = checkoutViewModel.getCartLiveData().getValue();
+            Double totalPrice = checkoutViewModel.getTotalPriceLiveData().getValue();
 
-    private void calculateTotalPriceAsync() {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            double totalPrices[] = {0.0};
-            for (Cart cart : cartList) {
-                Product product = productDao.getProductByBarcodes(cart.getProductBarcode());
-                if (product != null) {
-                    totalPrices[0] += product.getPrice() * cart.getQuantity();
-                } else {
-                    Log.e("CheckoutActivity", "Product not found for barcode: " + cart.getProductBarcode());
-                }
+            if (currentCart != null && totalPrice != null) {
+                checkoutViewModel.addOrderToDatabase(currentCart, totalPrice);
+                Toast.makeText(this, "Order placed successfully!", Toast.LENGTH_SHORT).show();
+                // After placing the order, refresh the data (clear cart)
+                checkoutViewModel.refreshData();
+                Intent intent = new Intent(this, AccountManagementActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);// This will clear the cart and update the UI
+            } else {
+                Toast.makeText(this, "Error placing order. Please try again!", Toast.LENGTH_SHORT).show();
             }
-            totalPrice = totalPrices[0];
-            // Update the UI on the main thread after calculation
-            runOnUiThread(() -> {
-                Log.d("CheckoutActivity", "Total price calculated: $" + totalPrices[0]);
-                checkoutTotalPrice.setText("Total: $" + String.format("%.2f", totalPrices[0]));
-            });
         });
     }
 
-    private void addOrderToDatabase(List<Cart> cartList, double totalPrice) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String currentDate = dateFormat.format(new Date());
-
-        Order order = new Order();
-        order.setUserId(userId);
-        order.setUserName(username);
-        order.setPrice(totalPrice);
-        order.setDate(currentDate);
-        order.setStatus("Pending");
-        Log.e("cart", "Product not found for barcode: " + cartList.get(0).getCartId());
-        Log.e("cart", "Product not found for barcode: " + cartList.get(0).getProductBarcode());
-
-
-        order.setCartId(cartList.get(0).getCartId());
-
-        orderDao.insertOrder(order);
-    }
-
-    private void clearCartForUser(int userId) {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            cartDao.clearCartForUser(userId);
-            runOnUiThread(() -> cartList.clear());
-        });
-    }
 }

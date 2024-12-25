@@ -41,6 +41,8 @@
         android:layout_marginBottom="8dp" />
 
     <!--Edition-->
+
+
     <TextView
         android:id="@+id/productEdition"
         android:layout_width="wrap_content"
@@ -49,14 +51,6 @@
         android:textSize="14sp"
         android:layout_marginBottom="8dp" />
 
-    <!--    Barcode-->
-    <TextView
-        android:id="@+id/productBarcode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Barcode: "
-        android:textSize="16sp"
-        android:layout_marginTop="8dp"/>
 
     <!--    Category-->
 
@@ -78,13 +72,31 @@
         android:textSize="14sp"
         android:layout_marginBottom="8dp"/>
 
+
+    <!--    quantity-->
+
+    <TextView
+        android:id="@+id/productQuantity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="quantity: "
+        android:textSize="14sp"
+        android:layout_marginBottom="8dp"/>
+    <!--    Barcode-->
+    <TextView
+        android:id="@+id/productBarcode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Barcode: "
+        android:textSize="16sp"
+        android:layout_marginTop="8dp"/>
     <!--Edit-->
     <Button
         android:id="@+id/btnEdit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Edit" />
-        <!--Delete-->
+    <!--Delete-->
     <Button
         android:id="@+id/btnDelete"
         android:layout_width="wrap_content"

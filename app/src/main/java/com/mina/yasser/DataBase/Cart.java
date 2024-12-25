@@ -3,9 +3,7 @@ package com.mina.yasser.DataBase;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
-
-@Entity(tableName = "cart", foreignKeys = @ForeignKey(entity = Product.class,
-        parentColumns = "barcode", childColumns = "productBarcode", onDelete = ForeignKey.CASCADE))
+@Entity(tableName = "cart")
 public class Cart {
     @PrimaryKey(autoGenerate = true)
     private int cartId;
@@ -14,14 +12,6 @@ public class Cart {
     private String productBarcode; // Now stores the product barcode
     private int quantity; // Stores the quantity of the product in the cart
     private double price; // Stores the price per unit of the product
-
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
 
     // Getters and Setters
     public int getCartId() {
@@ -54,5 +44,13 @@ public class Cart {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
     }
 }

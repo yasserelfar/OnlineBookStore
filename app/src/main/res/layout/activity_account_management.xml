@@ -4,15 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp">
-    <ImageButton
-        android:id="@+id/btnCart"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/btn_3"
-        android:contentDescription="Cart"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:padding="8dp"
-        android:layout_gravity="end" /> <!-- Align to the right side -->
+
     <EditText
         android:id="@+id/etUsername"
         android:layout_width="match_parent"
@@ -26,7 +18,12 @@
         android:layout_height="wrap_content"
         android:hint="Email"
         android:minHeight="48dp" />
-
+    <EditText
+        android:id="@+id/etPass"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Password"
+        android:minHeight="48dp" />
     <EditText
         android:id="@+id/etAddress"
         android:layout_width="match_parent"
@@ -41,13 +38,14 @@
         android:hint="Phone"
         android:minHeight="48dp" />
 
-    <TextView
+    <EditText
         android:id="@+id/tvBirthdate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Birthdate"
-        android:padding="8dp" />
-
+        android:hint="Birthdate"
+        android:layout_width="296dp"
+        android:layout_height="48dp"
+        android:focusable="false"
+        android:clickable="true"
+        />
     <Button
         android:id="@+id/btnUpdate"
         android:layout_width="match_parent"
@@ -60,8 +58,8 @@
         android:layout_height="wrap_content"
         android:text="Logout" />
     <Button
-        android:id="@+id/btnorders"
+        android:id="@+id/btnOrders"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="orders" />
+        android:text="Orders" />
 </LinearLayout>

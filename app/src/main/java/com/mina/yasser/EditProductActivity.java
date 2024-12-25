@@ -1,13 +1,21 @@
 package com.mina.yasser;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -18,7 +26,9 @@ import com.mina.yasser.DataBase.Product;
 import com.mina.yasser.DataBase.ProductDao;
 import com.mina.yasser.DataBase.CategoryDao;
 import com.mina.yasser.ViewModel.CategoryViewModel;
-import com.mina.yasser.flyweight.CategoryFactory;
+import com.mina.yasser.factory.CategoryFactory;
+
+import java.io.ByteArrayOutputStream;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -27,13 +37,16 @@ import java.util.concurrent.Executors;
 import java.util.List;
 
 public class EditProductActivity extends AppCompatActivity {
+    private static final int PICK_IMAGE_REQUEST = 1;
 
     private Spinner spinnerCategory;
     private EditText edtName, edtPrice, edtQuantity,edtEdition;
-    private Button btnSave;
+    private Button btnSave,btnSelectImage;
     private ProductDao productDao;
     private Product product;
     private ArrayAdapter<String> categoryAdapter;
+    private ImageView ivProductImage;
+    private byte[] productImage;
     private CategoryDao categoryDao;
     private CategoryViewModel categoryViewModel;
 
@@ -45,11 +58,12 @@ public class EditProductActivity extends AppCompatActivity {
         // Initialize views
         edtName = findViewById(R.id.edtProductName);
         edtPrice = findViewById(R.id.edtProductPrice);
-        edtEdition = findViewById(R.id.edtProductEdition);
         edtQuantity = findViewById(R.id.edtProductQuantity);
         btnSave = findViewById(R.id.btnSaveProduct);
         spinnerCategory = findViewById(R.id.spinnerCategory);
-
+        edtEdition = findViewById(R.id.edtProductEdition);
+        ivProductImage = findViewById(R.id.edtProductImage);
+        btnSelectImage = findViewById(R.id.btnSelectImage);
         // Initialize the database and DAOs
         AppDatabase database = AppDatabase.getInstance(this);
         productDao = database.productDao();
@@ -69,6 +83,33 @@ public class EditProductActivity extends AppCompatActivity {
 
         // Set up save button functionality
         btnSave.setOnClickListener(v -> saveProductDetails());
+        btnSelectImage.setOnClickListener(view -> openImagePicker());
+    }
+    private void openImagePicker() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+            Uri imageUri = data.getData();
+
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                ivProductImage.setImageBitmap(bitmap);
+
+                // Convert Bitmap to byte[]
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+                productImage = outputStream.toByteArray();
+            } catch (Exception e) {
+                Log.e("ImagePickerError", "Error selecting image", e);
+                Toast.makeText(this, "Failed to select image", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void populateCategorySpinner() {
@@ -76,7 +117,7 @@ public class EditProductActivity extends AppCompatActivity {
             @Override
             public void onChanged(List<Category> categories) {
                 if (categories != null && !categories.isEmpty()) {
-                    // Convert the category objects to category names using the flyweight method
+                    // Convert the category objects to category names using the factory method
                     List<String> categoryNames = CategoryFactory.convertToCategoryNames(categories);
                     categoryAdapter = new ArrayAdapter<>(EditProductActivity.this, android.R.layout.simple_spinner_item, categoryNames);
                     categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -103,6 +144,8 @@ public class EditProductActivity extends AppCompatActivity {
                 edtPrice.setText(String.valueOf(product.getPrice()));
                 edtQuantity.setText(String.valueOf(product.getQuantityInStock()));
                 edtEdition.setText(String.valueOf(product.getEdition()));
+                ivProductImage.setImageBitmap(BitmapFactory.decodeByteArray(product.getImage(), 0, product.getImage().length));
+                productImage=product.getImage();
                 // Populate category spinner after product details are fetched
                 if (categoryAdapter != null) {
                     categoryViewModel.getCategoryById(product.getCategoryId()).observe(this, new Observer<Category>() {
@@ -137,15 +180,15 @@ public class EditProductActivity extends AppCompatActivity {
 
         String updatedName = edtName.getText().toString().trim();
         String updatedPrice = edtPrice.getText().toString().trim();
-        String updatedEdition = edtEdition.getText().toString().trim();
         String updatedQuantity = edtQuantity.getText().toString().trim();
         String updatedCategory = spinnerCategory.getSelectedItem() != null ? spinnerCategory.getSelectedItem().toString() : null;
-
+        String updatedEdition = edtEdition.getText().toString().trim();
         // Validate fields
         if (updatedName.isEmpty() || updatedPrice.isEmpty() || updatedQuantity.isEmpty() || updatedCategory == null) {
             Toast.makeText(this, "Please fill in all fields and select a category.", Toast.LENGTH_SHORT).show();
             return;
         }
+        // Ensure valid price and quantity
 
         double price,edition;
         int quantity;
@@ -174,6 +217,7 @@ public class EditProductActivity extends AppCompatActivity {
                             product.setQuantityInStock(quantity);
                             product.setCategoryId(category.getId());  // Set the correct category ID
                             product.setEdition(edition);
+                            product.setImage(productImage);
                             // Run database operation on a background thread using Executor
                             executor.execute(() -> {
                                 try {

@@ -1,6 +1,7 @@
 package com.mina.yasser.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.mina.yasser.DataBase.Order;
@@ -48,9 +50,19 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 //        holder.bookName.setText("Book: " + order.getBookName()); // Binding book name
         holder.price.setText("Price: $" + String.format("%.2f", order.getPrice()));
         holder.status.setText("Status: " + order.getStatus());
-        if ("Canceled".equals(order.getStatus()))
+
+        if ("Canceled".equals(order.getStatus())||"Shipping".equals(order.getStatus()))
         {
+            holder.payButton.setEnabled(false);
             holder.cancelButton.setEnabled(false);
+        }
+        else if("Confirmed".equals(order.getStatus()))
+        {
+            holder.payButton.setEnabled(true);
+            holder.cancelButton.setEnabled(false);
+        }
+        else if("Pending".equals(order.getStatus())){
+            holder.payButton.setEnabled(false);
         }
         Log.d("OrderViewHolder", "orderId: " + holder.orderId);
         Log.d("OrderViewHolder", "userName: " + holder.userName);
@@ -59,8 +71,15 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         // Cancel order button
         holder.cancelButton.setOnClickListener(v -> {
             order.setStatus("Canceled");
-            updateOrder(order);
-            Toast.makeText(context, "Order canceled!", Toast.LENGTH_SHORT).show();
+            updateOrder(order,"Order canceled!");
+
+            holder.cancelButton.setEnabled(false);
+        });
+        holder.payButton.setOnClickListener(v -> {
+
+            order.setStatus("Shipping");
+            updateOrder(order,"Order payed!");
+            holder.payButton.setEnabled(false);
             holder.cancelButton.setEnabled(false);
         });
     }
@@ -70,13 +89,19 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         return orderList.size();
     }
 
-    private void updateOrder(Order order) {
+    private void updateOrder(Order order,String message) {
         // Use executor to run database operations in the background
-        Executors.newSingleThreadExecutor().execute(() -> orderDao.updateOrder(order));
+        Executors.newSingleThreadExecutor().execute(() -> {
+            orderDao.updateOrder(order);
+            ((AppCompatActivity) context).runOnUiThread(() -> {
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                notifyDataSetChanged();
+            });
+        });
     }
 
     static class OrderViewHolder extends RecyclerView.ViewHolder {
-        TextView orderId, userName, bookName, price, status;
+        TextView orderId, userName, bookName, price, status,payButton;
         Button  cancelButton;
 
         public OrderViewHolder(@NonNull View itemView) {
@@ -86,7 +111,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 //            bookName = itemView.findViewById(R.id.bookNameText); // Added missing view for bookName
             price = itemView.findViewById(R.id.priceText);
             status = itemView.findViewById(R.id.statusText);
-//            confirmButton = itemView.findViewById(R.id.confirmButton)
+            payButton = itemView.findViewById(R.id.payButton);
             cancelButton = itemView.findViewById(R.id.cancelButton);
         }
     }
