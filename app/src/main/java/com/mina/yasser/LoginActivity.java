@@ -22,7 +22,7 @@ public class LoginActivity extends AppCompatActivity {
     private CheckBox rememberMeCheckBox;
     private UserDao userDao;
     private SharedPreferences sharedPreferences;
-
+    boolean isRemembered;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,12 +42,17 @@ public class LoginActivity extends AppCompatActivity {
         sharedPreferences = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
 
         // Check if "Remember Me" is checked and pre-fill credentials
-        boolean isRemembered = sharedPreferences.getBoolean("RememberMe", false);
+       isRemembered = sharedPreferences.getBoolean("RememberMe", false);
+      boolean isadmin=sharedPreferences.getBoolean("admin", false);
         if (isRemembered) {
-            etUsername.setText(sharedPreferences.getString("Username", ""));
-            etPassword.setText(sharedPreferences.getString("Password", ""));
-            rememberMeCheckBox.setChecked(true);
-        }
+            if(isadmin){
+                Intent intent = new Intent(LoginActivity.this, AdminDashboardActivity.class);
+                startActivity(intent);
+            }
+            else{
+            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+            startActivity(intent);
+        }}
 
         // Handle "Forgot Password" click
         forgotPassword.setOnClickListener(v -> {
@@ -88,12 +93,15 @@ public class LoginActivity extends AppCompatActivity {
                                     .apply();
                         } else {
                             sharedPreferences.edit()
-                                    .clear()
+                                    .putString("Username", username)
+                                    .putString("Password", password)
+                                    .putInt("userId", user.getUserId())
                                     .apply();
                         }
 
                         Intent intent;
                         if (user.isAdmin()) {
+                            sharedPreferences.edit().putBoolean("admin",true).apply();
                             intent = new Intent(this, AdminDashboardActivity.class);
                         } else {
                             intent = new Intent(this, HomeActivity.class);

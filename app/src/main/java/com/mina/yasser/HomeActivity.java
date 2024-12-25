@@ -46,6 +46,7 @@ public class HomeActivity extends AppCompatActivity {
     private ProductDao productDao;
     private ProductAdapter productAdapter;
     private Button btnViewCart;
+    private Spinner spinnerSort;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,7 +61,8 @@ public class HomeActivity extends AppCompatActivity {
         productList.setLayoutManager(new LinearLayoutManager(this));
         productAdapter = new ProductAdapter(this, new ArrayList<>(), false, productDao,btnViewCart);
         productList.setAdapter(productAdapter);
-
+        spinnerSort = findViewById(R.id.spinnerSort); // Add this for the sorting spinner
+        setupSortSpinner(); // Call this to initialize sorting spinner
 //        productAdapter = new ProductAdapter(this, new ArrayList<>(), false, productDao, btnViewCart);//cart view btn
         // view cart button navigate to CartActivity
         btnViewCart.setOnClickListener(v -> {
@@ -121,7 +123,57 @@ public class HomeActivity extends AppCompatActivity {
         });
 
     }
+    private void setupSortSpinner() {
+        List<String> sortOptions = new ArrayList<>();
+        sortOptions.add("Sort by");
+        sortOptions.add("Popularity");
+        sortOptions.add("Price");
 
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, sortOptions);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerSort.setAdapter(adapter);
+
+        spinnerSort.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position == 1) {
+                    // Sort by popularity
+                    productAdapter.sortProducts("popularity", true);
+                } else if (position == 2) {
+                    // Sort by price
+                    productAdapter.sortProducts("price", true);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Optional: Handle the case when nothing is selected
+            }
+        });
+
+    }
+
+    // Sort products by popularity
+//    private void sortProductsByPopularity() {
+//        LiveData<List<Product>> allProducts = productDao.getAllProducts();
+//        allProducts.observe(this, products -> {
+//            if (products != null) {
+//                Collections.sort(products, (p1, p2) -> Integer.compare(p2.getPopularity(), p1.getPopularity()));
+//                productAdapter.setProductList(products);
+//            }
+//        });
+//    }
+//
+//    // Sort products by price
+//    private void sortProductsByPrice() {
+//        LiveData<List<Product>> allProducts = productDao.getAllProducts();
+//        allProducts.observe(this, products -> {
+//            if (products != null) {
+//                Collections.sort(products, (p1, p2) -> Double.compare(p1.getPrice(), p2.getPrice())); // Assuming Product has a 'price' field
+//                productAdapter.setProductList(products);
+//            }
+//        });
+//    }
     private void loadCategories() {
         CategoryDao categoryDao = AppDatabase.getInstance(this).categoryDao();
         categoryDao.getAllCategories().observe(this, categories -> {

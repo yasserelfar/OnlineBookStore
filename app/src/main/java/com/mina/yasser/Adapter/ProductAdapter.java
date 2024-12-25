@@ -5,6 +5,7 @@ import com.mina.yasser.HomeActivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +32,8 @@ import com.mina.yasser.EditProductActivity;
 import com.mina.yasser.ManageBooksActivity;
 import com.mina.yasser.R;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -111,7 +114,7 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     // ViewHolder for User
     static class ProductUserViewHolder extends RecyclerView.ViewHolder {
-        TextView nameTextView, priceTextView,populartiy,author,edition;
+        TextView nameTextView, priceTextView,populartiy,author,edition,productAvailable;
         ImageView productImageView;
         Button btnAddToCart;
 
@@ -122,6 +125,7 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             author=itemView.findViewById(R.id.productAuthor);
             edition=itemView.findViewById(R.id.productEdition);
             populartiy=itemView.findViewById(R.id.productPopularity);
+            productAvailable=itemView.findViewById(R.id.productAvailable);
             productImageView = itemView.findViewById(R.id.productImage);  // ImageView for product image
             btnAddToCart = itemView.findViewById(R.id.btnAddToCart);  // Button for Add to Cart
         }
@@ -129,7 +133,7 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     // ViewHolder for Admin
     static class ProductAdminViewHolder extends RecyclerView.ViewHolder {
-        TextView nameTextView, priceTextView, barcodeTextView,category,author,edition,populartiy;
+        TextView nameTextView, priceTextView, barcodeTextView,category,author,edition,populartiy,quantity;
         ImageView productImageView;
         Button btnEdit, btnDelete;
 
@@ -140,6 +144,7 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             populartiy=itemView.findViewById(R.id.productPopularity);
             edition=itemView.findViewById(R.id.productEdition);
             priceTextView = itemView.findViewById(R.id.productPrice);
+            quantity = itemView.findViewById(R.id.productQuantity);
             barcodeTextView = itemView.findViewById(R.id.productBarcode);
             category=itemView.findViewById(R.id.productcategory);
             productImageView=itemView.findViewById(R.id.productImage);
@@ -181,8 +186,17 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             ((ProductAdminViewHolder) holder).barcodeTextView.setText("Barcode: " + product.getBarcode());
             ((ProductAdminViewHolder) holder).category.setText("Category: Loading..."); // Temporary loading text
             ((ProductAdminViewHolder) holder).author.setText(product.getAuthor());
-            ((ProductAdminViewHolder) holder).populartiy.setText("popularity:"+product.getPopularity()); //Temporary loading text
+            ((ProductAdminViewHolder) holder).populartiy.setText("popularity: "+product.getPopularity()); //Temporary loading text
+            if(product.getQuantityInStock()==0)
+            {
+                ((ProductAdminViewHolder) holder).quantity.setText("OUT OF STOCK");
+                ((ProductAdminViewHolder) holder).quantity.setTextColor(Color.parseColor("#FF5722"));
 
+            }
+            else
+            {
+            ((ProductAdminViewHolder) holder).quantity.setText("quantity: "+product.getQuantityInStock());
+            }
             categoryDao = AppDatabase.getInstance(context).categoryDao(); // Ensure this is not null
 
             if (categoryDao != null && lifecycleOwner != null) {
@@ -220,7 +234,17 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             ((ProductUserViewHolder) holder).productImageView.setImageBitmap(BitmapFactory.decodeByteArray(product.getImage(), 0, product.getImage().length));
             ((ProductUserViewHolder) holder).edition.setText("Edition :"+ product.getEdition());
             ((ProductUserViewHolder) holder).priceTextView.setText("Price: $" + product.getPrice());
-
+            if(product.getQuantityInStock()==0)
+            {
+                ((ProductUserViewHolder) holder).productAvailable.setText("OUT OF STOCK");
+                ((ProductUserViewHolder) holder).productAvailable.setTextColor(Color.parseColor("#FF5722"));
+                ((ProductUserViewHolder) holder).btnAddToCart.setEnabled(false);
+            }
+            else{
+                ((ProductUserViewHolder) holder).productAvailable.setText("Status : Available");
+                ((ProductUserViewHolder) holder).productAvailable.setTextColor(Color.parseColor("#FFFFFF"));
+                ((ProductUserViewHolder) holder).btnAddToCart.setEnabled(true);
+            }
             // Handle Add to Cart button click
             ((ProductUserViewHolder) holder).btnAddToCart.setOnClickListener(v -> {
                 CartManager.getInstance().addToCart(product); // logic to add product to cart is done!
@@ -232,6 +256,22 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
+    public void sortProducts(String sortBy, boolean ascending) {
+        if (sortBy.equals("popularity")) {
+            Collections.sort(productList, (p1, p2) -> {
+                // Sort by popularity (assuming popularity is an integer)
+                return ascending ? Integer.compare(p1.getPopularity(), p2.getPopularity())
+                        : Integer.compare(p2.getPopularity(), p1.getPopularity());
+            });
+        } else if (sortBy.equals("price")) {
+            Collections.sort(productList, (p1, p2) -> {
+                // Sort by price (assuming price is a double)
+                return ascending ? Double.compare(p1.getPrice(), p2.getPrice())
+                        : Double.compare(p2.getPrice(), p1.getPrice());
+            });
+        }
+        notifyDataSetChanged(); // Update the adapter with the sorted list
+    }
 
     @Override
     public int getItemCount() {

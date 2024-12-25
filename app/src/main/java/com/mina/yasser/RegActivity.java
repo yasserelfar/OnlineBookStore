@@ -2,6 +2,7 @@ package com.mina.yasser;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -24,7 +25,7 @@ public class RegActivity extends AppCompatActivity {
     private Button btnSignUp;
     private AppDatabase database;
     private UserDao userDao;
-
+    private SharedPreferences sharedPreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,6 +38,7 @@ public class RegActivity extends AppCompatActivity {
         etAddress = findViewById(R.id.address);
         etPhone = findViewById(R.id.phone);
         etBirthdate = findViewById(R.id.birthdate);
+        sharedPreferences = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
 
         // Initialize the Room database
         database = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "bookstore_database").build();
@@ -106,6 +108,11 @@ public class RegActivity extends AppCompatActivity {
 
                 // Insert into the database
                 userDao.insertUser(newUser);
+                sharedPreferences.edit()
+                        .putString("Username", username)
+                        .putString("Password", password)
+                        .putInt("userId", newUser.getUserId())
+                        .apply();
                 // Navigate to MainActivity on success
                 runOnUiThread(() -> {
                     Toast.makeText(this, "User registered successfully!", Toast.LENGTH_SHORT).show();

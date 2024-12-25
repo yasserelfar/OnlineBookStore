@@ -100,14 +100,14 @@ public class AccountManagementActivity extends AppCompatActivity {
             Toast.makeText(this, "All fields must be filled!", Toast.LENGTH_SHORT).show();
             return;
         }
-        final User[] check = {new User()};
-        new Thread(() -> {
-            check[0] =userDao.getUserByUsername(newUsername);
-        }).start();
-        if(check[0]!=null){
-            Toast.makeText(this, "UserName used before", Toast.LENGTH_SHORT).show();
-            return;
-        }
+//        final User[] check = {new User()};
+//        new Thread(() -> {
+//            check[0] =userDao.getUserByUsername(newUsername);
+//        }).start();
+//        if(check[0]!=null){
+//            Toast.makeText(this, "UserName used before", Toast.LENGTH_SHORT).show();
+//            return;
+//        }
         new Thread(() -> {
             // Update user details
             currentUser.setUsername(newUsername);
@@ -115,7 +115,8 @@ public class AccountManagementActivity extends AppCompatActivity {
             currentUser.setAddress(newAddress);
             currentUser.setPhone(newPhone);
             currentUser.setBirthdate(newBirthdate);
-            currentUser.setPassword(newPass);
+            if(!newPass.isEmpty())
+            {currentUser.setPassword(newPass);}
             userDao.update(currentUser);
 
             // Update SharedPreferences

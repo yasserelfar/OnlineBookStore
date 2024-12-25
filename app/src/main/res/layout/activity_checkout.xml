@@ -16,13 +16,14 @@
         android:paddingBottom="20dp" />
 
     <!-- RecyclerView to show cart items -->
+
+    <!-- Total Price -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewOrderDetails"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <!-- Total Price -->
     <TextView
         android:id="@+id/totalPrice"
         android:layout_width="match_parent"
