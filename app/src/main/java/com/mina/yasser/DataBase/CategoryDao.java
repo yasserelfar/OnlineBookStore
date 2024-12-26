@@ -16,6 +16,8 @@ public interface CategoryDao {
 
     @Update
     void updateCategory(Category category);
+    @Query("SELECT * FROM categories WHERE id = :categoryId")
+    Category getCategoryByIdSync(int categoryId);
 
     @Delete
     void deleteCategory(Category category);

@@ -107,6 +107,7 @@ public class HomeActivity extends AppCompatActivity {
                 position--;
                 if(position!=-1){
                     int selectedCategoryId = categoryList.get(position).getId();
+                    Log.d("categoryid","category id is : "+categoryList.get(position).getId());
                     filterByCategory(selectedCategoryId);}
                 else{
                     allProducts.observe(HomeActivity.this, products -> productAdapter.setProductList(products));

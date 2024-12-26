@@ -7,11 +7,17 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.mina.yasser.AccountManagementActivity;
+import com.mina.yasser.CheckoutActivity;
 import com.mina.yasser.DataBase.AppDatabase;
 import com.mina.yasser.DataBase.Cart;
 import com.mina.yasser.DataBase.CartDao;
+import com.mina.yasser.DataBase.Category;
+import com.mina.yasser.DataBase.CategoryDao;
 import com.mina.yasser.DataBase.Order;
 import com.mina.yasser.DataBase.OrderDao;
+import com.mina.yasser.DataBase.OrderDetailDao;
+import com.mina.yasser.DataBase.OrderItem;
+import com.mina.yasser.DataBase.OrderItemDao;
 import com.mina.yasser.DataBase.Product;
 import com.mina.yasser.DataBase.ProductDao;
 import com.mina.yasser.DataBase.User;
@@ -36,12 +42,19 @@ public class CheckoutViewModel extends ViewModel {
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private UserDao userDao;
 
-    public CheckoutViewModel(CartDao cartDao, ProductDao productDao, OrderDao orderDao,UserDao userDao, int userId) {
+    private OrderItemDao orderItemDao;
+    private CategoryDao categoryDao;
+    private CategoryDao categoryViewModel;
+
+    public CheckoutViewModel(CartDao cartDao, ProductDao productDao, OrderDao orderDao, UserDao userDao, OrderItemDao orderItemDao, CategoryDao categoryDao,CategoryDao categoryViewModel, int userId) {
         this.cartDao = cartDao;
         this.productDao = productDao;
         this.orderDao = orderDao;
         this.userId = userId;
         this.userDao=userDao;
+        this.orderItemDao=orderItemDao;
+        this.categoryDao=categoryDao;
+        this.categoryViewModel=categoryViewModel;
         // Load initial cart
         loadCartData();
     }
@@ -79,45 +92,94 @@ public class CheckoutViewModel extends ViewModel {
     }
 
     // Add order to the database
+
     public void addOrderToDatabase(List<Cart> cartList, double totalPrice) {
+        if (cartList == null || cartList.isEmpty()) {
+            Log.e("CheckoutViewModel", "Cart list is null or empty. Cannot place order.");
+            return;
+        }
+
+        Log.d("carts", "Cart size is " + cartList.size());
         executorService.execute(() -> {
-            if (cartList != null && !cartList.isEmpty()) {
-                try {
-                    // Create a new Order and insert it into the database
-                    Order newOrder = new Order();
-                    newOrder.setUserId(userId);
-
-                    newOrder.setUserName(userDao.getUserById(userId).getUsername()); // Replace with actual user name
-                    newOrder.setPrice(totalPrice);
-                    newOrder.setStatus("Pending");
-                    String currentDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-                    newOrder.setDate(currentDate);
-                    // Handle cartId properly. You may need to iterate over cartList for each item.
-                    // Here we're assuming one cart per order for simplicity, but adjust for multiple items if necessary.
-                    newOrder.setCartId(cartList.get(0).getCartId());
-
-                    Log.d("CheckoutViewModel", "userId: " + userId);
-                    orderDao.insertOrder(newOrder);  // Insert order without setting the orderId manually
-                    Log.d("CheckoutViewModel", "orderId: " + newOrder.getOrderId());
-                    Log.d("CheckoutViewModel", "cartId: " + newOrder.getCartId());
-                    Log.d("CheckoutViewModel", "userIdOrder: " + newOrder.getUserId());
-
-                    // Clear the cart after placing the order
-                    cartDao.clearCartByUserId(userId);
-
-                    // Refresh the cart data after clearing
-                    loadCartData();
-
-                    Log.d("CheckoutViewModel", "Order placed successfully!");
-
-                } catch (Exception e) {
-                    Log.e("CheckoutViewModel", "Error while adding order: " + e.getMessage());
+            try {
+                // Retrieve cart ID and validate cart existence
+                int cartId = cartList.get(0).getCartId();
+                Cart cart = cartDao.getCartItemsByCartId(cartId);
+                if (cart == null) {
+                    Log.e("CheckoutViewModel", "Cart with ID " + cartId + " does not exist.");
+                    return;
                 }
-            } else {
-                Log.e("CheckoutViewModel", "Cart is empty or null.");
+
+                // Create and insert the order
+                Order newOrder = new Order();
+                newOrder.setUserId(userId);
+                newOrder.setUserName(userDao.getUserById(userId).getUsername());
+                newOrder.setPrice(totalPrice);
+                newOrder.setStatus("Pending");
+                String currentDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+                newOrder.setDate(currentDate);
+                newOrder.setCartId(cartId);
+
+                // Insert order and retrieve generated ID
+                Log.d("CheckoutViewModel", "Order created with ID: " + newOrder.getOrderId());
+                orderDao.insertOrder(newOrder);
+// إدخال الطلب أولاً
+                long insertedOrderId = orderDao.insertOrder(newOrder);
+                if (insertedOrderId == 0) {
+                    Log.e("CheckoutViewModel", "Failed to insert Order into the database.");
+                    return;
+                }
+                newOrder.setOrderId((int) insertedOrderId); // التأكد من تعيين الـ orderId بعد الإدخال
+
+                // Insert OrderItems for each Cart item
+                for (Cart cartItem : cartList) {
+                    // Check product existence
+                    Product product = productDao.getProductByBarcodes(cartItem.getProductBarcode());
+                    if (product == null) {
+                        Log.e("CheckoutViewModel", "Product not found: " + cartItem.getProductBarcode());
+                        continue;
+                    }
+
+                    Log.d("CheckoutViewModel", "Product found: " + product.getName()+" "+product.getBarcode());
+
+                    // Check category existence
+                    Category category = categoryDao.getCategoryByIdSync(product.getCategoryId());
+                    if (category == null) {
+                        Log.e("CheckoutViewModel", "Category with ID " + product.getCategoryId() + " does not exist.");
+                        continue;
+                    }
+
+                    Log.d("CheckoutViewModel", "Category found: " + category.getName()+" "+category.getId() );
+
+                    // Create and insert OrderItem
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setOrderId(newOrder.getOrderId());
+                    orderItem.setProductBarcode(cartItem.getProductBarcode());
+                    orderItem.setQuantity(cartItem.getQuantity());
+
+                    // Insert OrderItem
+                     orderItemDao.insert(orderItem);
+                    Log.d("CheckoutViewModel", "OrderItem added with ID: " + orderItem.getId());
+                }
+
+                // Clear the cart after order completion
+                cartDao.clearCartByUserId(userId);
+
+                // Reload cart data
+                loadCartData();
+
+                Log.d("CheckoutViewModel", "Order and OrderItems placed successfully!");
+            } catch (Exception e) {
+                Log.e("CheckoutViewModel", "Error while adding order: " + e.getMessage(), e);
             }
         });
     }
+
+
+
+
+
+
 
 
 

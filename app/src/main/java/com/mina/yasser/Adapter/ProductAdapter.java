@@ -272,8 +272,10 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 if (existingCartItem != null) {
                     // If the product is already in the cart, update the quantity
                     existingCartItem.setQuantity(existingCartItem.getQuantity() + 1);
+                    Log.d("AddToCart", "Cart id: " + existingCartItem.getCartId());
                     cartDao.updateCart(existingCartItem);
                     Log.d("AddToCart", "Updated quantity for product: " + product.getName());
+
                 } else {
                     // If the product is not in the cart, add a new item
                     Cart newCartItem = new Cart();
@@ -281,7 +283,9 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     newCartItem.setProductBarcode(product.getBarcode());
                     newCartItem.setQuantity(1);
                     cartDao.insertProduct(newCartItem);
+                    Log.d("AddToCartAddToCart", "Cart id: " + newCartItem.getCartId());
                     Log.d("AddToCart", "Inserted new product: " + product.getName());
+
                 }
 
                 // Post a toast message to the main thread

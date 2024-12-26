@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModelProvider;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,9 +19,13 @@ import com.mina.yasser.Adapter.CheckoutAdapter;
 import com.mina.yasser.DataBase.AppDatabase;
 import com.mina.yasser.DataBase.Cart;
 import com.mina.yasser.DataBase.CartDao;
+import com.mina.yasser.DataBase.CategoryDao;
 import com.mina.yasser.DataBase.OrderDao;
+import com.mina.yasser.DataBase.OrderDetailDao;
+import com.mina.yasser.DataBase.OrderItemDao;
 import com.mina.yasser.DataBase.ProductDao;
 import com.mina.yasser.DataBase.UserDao;
+import com.mina.yasser.ViewModel.CategoryViewModel;
 import com.mina.yasser.ViewModel.CheckoutViewModel;
 import com.mina.yasser.factory.CheckoutViewModelFactory;
 
@@ -37,7 +42,9 @@ public class CheckoutActivity extends AppCompatActivity {
     private ProductDao productDao;
     int userId;
     private SharedPreferences sharedPreferences;
-
+    private OrderItemDao orderItemDao;
+    private CategoryDao categoryDao;
+    CategoryViewModel categoryViewModel;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,14 +55,17 @@ public class CheckoutActivity extends AppCompatActivity {
         cartDao = AppDatabase.getInstance(this).cartDao();
         orderDao = AppDatabase.getInstance(this).orderDao();
         productDao = AppDatabase.getInstance(this).productDao();
+        orderItemDao=AppDatabase.getInstance(this).orderItemDao();
+        categoryDao=AppDatabase.getInstance(this).categoryDao();
         sharedPreferences = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+        categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
 
         // Get stored userId
         userId = sharedPreferences.getInt("userId", -1);
 
         // Initialize ViewModel using the factory
         checkoutViewModel = new ViewModelProvider(this,
-                new CheckoutViewModelFactory(cartDao, productDao, orderDao,userDao, userId))
+                new CheckoutViewModelFactory(cartDao, productDao, orderDao,userDao,  orderItemDao,categoryDao,categoryViewModel, userId))
                 .get(CheckoutViewModel.class);
 
         // Initialize UI components
@@ -90,13 +100,13 @@ public class CheckoutActivity extends AppCompatActivity {
             // Get current cart data and total price
             List<Cart> currentCart = checkoutViewModel.getCartLiveData().getValue();
             Double totalPrice = checkoutViewModel.getTotalPriceLiveData().getValue();
-
+            Log.d("carts","cart size is "+currentCart.size());
             if (currentCart != null && totalPrice != null) {
                 checkoutViewModel.addOrderToDatabase(currentCart, totalPrice);
                 Toast.makeText(this, "Order placed successfully!", Toast.LENGTH_SHORT).show();
                 // After placing the order, refresh the data (clear cart)
                 checkoutViewModel.refreshData();
-                Intent intent = new Intent(this, AccountManagementActivity.class);
+                Intent intent = new Intent(this, HomeActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);// This will clear the cart and update the UI
             } else {

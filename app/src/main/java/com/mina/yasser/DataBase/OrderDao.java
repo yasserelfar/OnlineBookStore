@@ -13,7 +13,7 @@ public interface OrderDao {
 
     // Insert a new order
     @Insert
-    void insertOrder(Order order);
+    long insertOrder(Order order);
 
     // Update an existing order (e.g., to change the status or details)
     @Update

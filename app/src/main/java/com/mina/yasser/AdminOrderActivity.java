@@ -16,6 +16,7 @@ import com.mina.yasser.DataBase.AppDatabase;
 import com.mina.yasser.DataBase.CartDao;
 import com.mina.yasser.DataBase.Order;
 import com.mina.yasser.DataBase.OrderDao;
+import com.mina.yasser.DataBase.OrderItemDao;
 import com.mina.yasser.DataBase.ProductDao;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public class AdminOrderActivity extends AppCompatActivity {
     private OrderDao orderDao;
     private CartDao cartDao;
     private ProductDao productDao;
-
+    private OrderItemDao orderItemDao;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,7 +35,7 @@ public class AdminOrderActivity extends AppCompatActivity {
         orderDao = AppDatabase.getInstance(this).orderDao();
         cartDao = AppDatabase.getInstance(this).cartDao();
         productDao = AppDatabase.getInstance(this).productDao();
-
+        orderItemDao=AppDatabase.getInstance(this).orderItemDao();
         RecyclerView adminOrderRecyclerView = findViewById(R.id.adminOrderRecyclerView);
         adminOrderRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -43,7 +44,7 @@ public class AdminOrderActivity extends AppCompatActivity {
             List<Order> orders = orderDao.getAllOrders();
             if (orders != null) {
             runOnUiThread(() -> {
-                AdminOrderAdapter adapter  = new AdminOrderAdapter(orders, orderDao, cartDao, productDao, this);
+                AdminOrderAdapter adapter  = new AdminOrderAdapter(orders, orderDao, cartDao, productDao, orderItemDao,this);
                 adminOrderRecyclerView.setAdapter(adapter);
             });
         }
