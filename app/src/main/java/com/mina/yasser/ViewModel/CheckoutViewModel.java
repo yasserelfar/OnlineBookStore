@@ -120,16 +120,15 @@ public class CheckoutViewModel extends ViewModel {
                 newOrder.setDate(currentDate);
                 newOrder.setCartId(cartId);
 
-                // Insert order and retrieve generated ID
+                // Insert order and retrieve generated ID (do this once)
                 Log.d("CheckoutViewModel", "Order created with ID: " + newOrder.getOrderId());
-                orderDao.insertOrder(newOrder);
-// إدخال الطلب أولاً
-                long insertedOrderId = orderDao.insertOrder(newOrder);
+                long insertedOrderId = orderDao.insertOrder(newOrder); // Insert once
                 if (insertedOrderId == 0) {
                     Log.e("CheckoutViewModel", "Failed to insert Order into the database.");
                     return;
                 }
-                newOrder.setOrderId((int) insertedOrderId); // التأكد من تعيين الـ orderId بعد الإدخال
+
+                newOrder.setOrderId((int) insertedOrderId); // Assign the orderId after insertion
 
                 // Insert OrderItems for each Cart item
                 for (Cart cartItem : cartList) {
@@ -140,7 +139,7 @@ public class CheckoutViewModel extends ViewModel {
                         continue;
                     }
 
-                    Log.d("CheckoutViewModel", "Product found: " + product.getName()+" "+product.getBarcode());
+                    Log.d("CheckoutViewModel", "Product found: " + product.getName() + " " + product.getBarcode());
 
                     // Check category existence
                     Category category = categoryDao.getCategoryByIdSync(product.getCategoryId());
@@ -149,7 +148,7 @@ public class CheckoutViewModel extends ViewModel {
                         continue;
                     }
 
-                    Log.d("CheckoutViewModel", "Category found: " + category.getName()+" "+category.getId() );
+                    Log.d("CheckoutViewModel", "Category found: " + category.getName() + " " + category.getId());
 
                     // Create and insert OrderItem
                     OrderItem orderItem = new OrderItem();
@@ -158,7 +157,7 @@ public class CheckoutViewModel extends ViewModel {
                     orderItem.setQuantity(cartItem.getQuantity());
 
                     // Insert OrderItem
-                     orderItemDao.insert(orderItem);
+                    orderItemDao.insert(orderItem);
                     Log.d("CheckoutViewModel", "OrderItem added with ID: " + orderItem.getId());
                 }
 
