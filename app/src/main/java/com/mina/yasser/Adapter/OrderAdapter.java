@@ -1,7 +1,7 @@
 package com.mina.yasser.Adapter;
 
 import android.content.Context;
-import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,23 +16,49 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.mina.yasser.DataBase.Order;
 import com.mina.yasser.DataBase.OrderDao;
+import com.mina.yasser.DataBase.OrderItem;
+import com.mina.yasser.DataBase.OrderItemDao;
+import com.mina.yasser.DataBase.Product;
+import com.mina.yasser.DataBase.ProductDao;
 import com.mina.yasser.R;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHolder> {
-
+    private SharedPreferences sharedPreferences;
     private final List<Order> orderList;
     private final OrderDao orderDao;
-    private final Context context; // Use context in constructor
+    private final OrderItemDao orderItemDao;
+    private final ProductDao productDao;
+    private final Context context;
+    private final int userId;
 
-    public OrderAdapter(List<Order> orderList, OrderDao orderDao, Context context) {
+    public OrderAdapter(List<Order> orderList, OrderDao orderDao, OrderItemDao orderItemDao, ProductDao productDao, Context context) {
         this.orderList = orderList;
         this.orderDao = orderDao;
+        this.orderItemDao = orderItemDao;
+        this.productDao = productDao;
         this.context = context;
-    }
 
+        // Get the userId from SharedPreferences
+        SharedPreferences sharedPreferences = context.getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
+        this.userId = sharedPreferences.getInt("userId", -1);
+
+
+        // Filter the orders based on userId
+//        filterOrdersByUserId(orderList);
+    }
+    private void filterOrdersByUserId(List<Order> allOrders) {
+        if (userId != -1) {
+            for (Order order : allOrders) {
+                if (order.getUserId()==userId) {
+                    orderList.add(order); // Add order to the list if it belongs to the current user
+                }
+            }
+        }
+    }
     @NonNull
     @Override
     public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -45,40 +71,54 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         Order order = orderList.get(position);
 
         // Bind order details
-        holder.orderId.setText("Order ID: " + order.getOrderId());
-        holder.userName.setText("User: " + order.getUserName());
-//        holder.bookName.setText("Book: " + order.getBookName()); // Binding book name
-        holder.price.setText("Price: $" + String.format("%.2f", order.getPrice()));
-        holder.status.setText("Status: " + order.getStatus());
+        holder.orderDetails.setText(
+                "Order ID: " + order.getOrderId() +
+                        "\nUser: " + order.getUserName() +
+                        "\nPrice: $" + String.format("%.2f", order.getPrice()) +
+                        "\nStatus: " + order.getStatus()
+        );
 
-        if ("Canceled".equals(order.getStatus())||"Shipping".equals(order.getStatus()))
-        {
+        if ("Canceled".equals(order.getStatus()) || "Shipping".equals(order.getStatus())) {
             holder.payButton.setEnabled(false);
             holder.cancelButton.setEnabled(false);
-        }
-        else if("Confirmed".equals(order.getStatus()))
-        {
+        } else if ("Confirmed".equals(order.getStatus())) {
             holder.payButton.setEnabled(true);
             holder.cancelButton.setEnabled(false);
-        }
-        else if("Pending".equals(order.getStatus())){
+        } else if ("Pending".equals(order.getStatus())) {
             holder.payButton.setEnabled(false);
         }
-        Log.d("OrderViewHolder", "orderId: " + holder.orderId);
-        Log.d("OrderViewHolder", "userName: " + holder.userName);
-        Log.d("OrderViewHolder", "price: " + holder.price);
-        Log.d("OrderViewHolder", "status: " +holder.status);
+
+        // Fetch order items asynchronously using orderId
+        Executors.newSingleThreadExecutor().execute(() -> {
+            List<OrderItem> orderItems = orderItemDao.getOrderItemsByOrderId(order.getOrderId());
+            StringBuilder bookDetails = new StringBuilder();
+            if (orderItems != null && !orderItems.isEmpty()) {
+                for (OrderItem orderItem : orderItems) {
+                    Product product = productDao.getProductByBarcodes(orderItem.getProductBarcode());
+                    if (product != null) {
+                        bookDetails.append("- ").append(product.getName())
+                                .append(" (Qty: ").append(orderItem.getQuantity())
+                                .append(")\n");
+                    }
+                }
+            }
+            String finalBookDetails = bookDetails.length() > 0 ? bookDetails.toString().trim() : "No books in this order.";
+
+            // Update the UI with the order items
+            ((AppCompatActivity) context).runOnUiThread(() -> holder.booksDetails.setText(finalBookDetails));
+        });
+
         // Cancel order button
         holder.cancelButton.setOnClickListener(v -> {
             order.setStatus("Canceled");
-            updateOrder(order,"Order canceled!");
-
+            updateOrder(order, "Order Canceled!");
             holder.cancelButton.setEnabled(false);
         });
-        holder.payButton.setOnClickListener(v -> {
 
+        // Pay order button
+        holder.payButton.setOnClickListener(v -> {
             order.setStatus("Shipping");
-            updateOrder(order,"Order payed!");
+            updateOrder(order, "Order Paid!");
             holder.payButton.setEnabled(false);
             holder.cancelButton.setEnabled(false);
         });
@@ -89,8 +129,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         return orderList.size();
     }
 
-    private void updateOrder(Order order,String message) {
-        // Use executor to run database operations in the background
+    private void updateOrder(Order order, String message) {
         Executors.newSingleThreadExecutor().execute(() -> {
             orderDao.updateOrder(order);
             ((AppCompatActivity) context).runOnUiThread(() -> {
@@ -101,16 +140,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
     }
 
     static class OrderViewHolder extends RecyclerView.ViewHolder {
-        TextView orderId, userName, bookName, price, status,payButton;
-        Button  cancelButton;
+        TextView orderDetails, booksDetails;
+        Button payButton, cancelButton;
 
         public OrderViewHolder(@NonNull View itemView) {
             super(itemView);
-            orderId = itemView.findViewById(R.id.orderIdText);
-            userName = itemView.findViewById(R.id.userNameText);
-//            bookName = itemView.findViewById(R.id.bookNameText); // Added missing view for bookName
-            price = itemView.findViewById(R.id.priceText);
-            status = itemView.findViewById(R.id.statusText);
+            orderDetails = itemView.findViewById(R.id.orderDetails);
+            booksDetails = itemView.findViewById(R.id.booksDetails);
             payButton = itemView.findViewById(R.id.payButton);
             cancelButton = itemView.findViewById(R.id.cancelButton);
         }
